@@ -1,4 +1,4 @@
-name: Build toolchains
+name: Build ARC toolchains
 
 on:
   workflow_call:

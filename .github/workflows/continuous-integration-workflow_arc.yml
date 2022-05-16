@@ -69,7 +69,7 @@ jobs:
 
   toolchains:
     needs: [ crosstool, tarballs ]
-    uses: ./.github/workflows/build-toolchains_arc.yml
+    uses: ./.github/workflows/build-toolchains-arc.yml
     with:
       samples: >-
         [
