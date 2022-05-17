@@ -12,6 +12,7 @@ jobs:
   build:
     runs-on: ${{ matrix.host }}
     strategy:
+      fail-fast: false
       matrix:
         #host: [ "ubuntu-latest", "macos-10.15" ]
         host: [ "ubuntu-latest" ]
