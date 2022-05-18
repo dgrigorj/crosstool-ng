@@ -105,9 +105,9 @@ jobs:
     uses: ./.github/workflows/build-toolchains-arc.yml
     with:
       gcc_commit:       ${{needs.variables.outputs.GCC_COMMIT}}
-      binutils_commit:  ${{needs.variables.outputs.BINUTILS_COMMIT}}"
-      newlib_commit:    ${{needs.variables.outputs.NEWLIB_COMMIT}}"
-      glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}"
+      binutils_commit:  ${{needs.variables.outputs.BINUTILS_COMMIT}}
+      newlib_commit:    ${{needs.variables.outputs.NEWLIB_COMMIT}}
+      glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}
       samples: >-
         [
           "snps-arc-arc700-linux-uclibc",
