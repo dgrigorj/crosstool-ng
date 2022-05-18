@@ -50,16 +50,13 @@ jobs:
       - name: Patch sample with input revisions
         run: |
           pushd .local/share/crosstool-ng/samples/${{ matrix.sample }}
-            echo ${{ inputs.gcc_commit }}
             sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.gcc_commit }}\"/"  crosstool.config
-            # sed -i \
-            #     -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.gcc_commit }}\"/"            \
-            #     -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"  \
-            #     -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"       \
-            #     -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.newlib_commit }}\"/"      \
-            #     -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.newlib_commit }}\"/" \
-            #     -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.glibc_commit }}\"/"        \
-            # crosstool.config
+            sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.gcc_commit }}\"/"  crosstool.config
+            sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"  crosstool.config
+            sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"  crosstool.config
+            sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.newlib_commit }}\"/"  crosstool.config
+            sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.newlib_commit }}\"/"  crosstool.config
+            sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.glibc_commit }}\"/"  crosstool.config            
           popd
 
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
