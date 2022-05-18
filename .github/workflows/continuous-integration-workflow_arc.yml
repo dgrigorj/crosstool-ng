@@ -59,13 +59,6 @@ jobs:
         with:
           name: crosstool.ubuntu-latest
           path: ct-ng.tar
-      # - name: "upload config.log"
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: config.log.${{ matrix.host }}
-      #     path: config.log
-      #   if: ${{ always() }}
-
 
   variables:
     runs-on: ubuntu-latest
