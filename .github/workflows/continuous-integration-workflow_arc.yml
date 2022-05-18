@@ -1,16 +1,45 @@
-name: CI_ARC
+name: ARC_Crosstool_CI
 
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      gcc:
+        description: GCC branch name
+        required: false
+        default: arc-2022.03
+        type: string
+      binutils:
+        description: Binutils branch name
+        required: false
+        default: arc-2022.03
+        type: string
+      newlib:
+        description: Newlib branch name
+        required: false
+        default: arc-2022.03
+        type: string
+      glibc:
+        description: Glibc branch name
+        required: false
+        default: arc64-2.34
+        type: string
+
+env:
+  GCC_REPO_URL:            "https://github.com/foss-for-synopsys-dwc-arc-processors/gcc"
+  GCC_BRANCH_DEFAULT:      "arc-2022.03"
+  BINUTILS_REPO_URL:       "https://github.com/foss-for-synopsys-dwc-arc-processors/binutils-gdb"
+  BINUTILS_BRANCH_DEFAULT: "arc-2022.03"
+  NEWLIB_REPO_URL:         "https://github.com/foss-for-synopsys-dwc-arc-processors/newlib"
+  NEWLIB_BRANCH_DEFAULT:   "arc-2022.03"
+  GLIBC_REPO_URL:          "https://github.com/foss-for-synopsys-dwc-arc-processors/glibc"
+  GLIBC_BRANCH_DEFAULT:    "arc64-2.34"
 
 
 jobs:
   crosstool:
-    runs-on: ${{ matrix.host }}
-    strategy:
-      matrix:
-        host: [ "ubuntu-latest" ]
+    runs-on: ubuntu-latest
     steps:
       - name: "clone"
         uses: actions/checkout@v2
@@ -28,40 +57,64 @@ jobs:
       - name: "upload ct-ng"
         uses: actions/upload-artifact@v2
         with:
-          name: crosstool.${{ matrix.host }}
+          name: crosstool.ubuntu-latest
           path: ct-ng.tar
-      - name: "upload config.log"
-        uses: actions/upload-artifact@v2
-        with:
-          name: config.log.${{ matrix.host }}
-          path: config.log
-        if: ${{ always() }}
+      # - name: "upload config.log"
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: config.log.${{ matrix.host }}
+      #     path: config.log
+      #   if: ${{ always() }}
 
-  # tarballs:
-  #   needs: crosstool
-  #   runs-on: ${{ matrix.host }}
-  #   strategy:
-  #     matrix:
-  #       host: [ "ubuntu-latest" ]
-  #   steps:
-  #     - name: "download ct-ng"
-  #       uses: actions/download-artifact@v2
-  #       with:
-  #         name: crosstool.${{ matrix.host }}
-  #     - name: "extract ct-ng"
-  #       run: |
-  #         tar -xf ct-ng.tar
-  #     - name: "prereq Linux"
-  #       if: ${{ runner.os == 'Linux' }}
-  #       run: |
-  #         sudo apt-get install -y gperf help2man libtool-bin
-  #         echo "$GITHUB_WORKSPACE/.local/bin" >> $GITHUB_PATH
+
+  variables:
+    runs-on: ubuntu-latest
+    outputs:      
+      GCC_COMMIT: ${{ steps.variables.outputs.GCC_COMMIT }}
+      BINUTILS_COMMIT: ${{ steps.variables.outputs.BINUTILS_COMMIT }}
+      NEWLIB_COMMIT: ${{ steps.variables.outputs.NEWLIB_COMMIT }}
+      GLIBC_COMMIT: ${{ steps.variables.outputs.GLIBC_COMMIT }}
+    steps:
+      - name: Set github parameters
+        id: variables
+        run: |
+          echo "Setting Git variables"
+          
+          #manual run parameters
+          GCC_INPUT=${{ github.event.inputs.gcc }}
+          BINUTILS_INPUT=${{ github.event.inputs.binutils }}
+          NEWLIB_INPUT=${{ github.event.inputs.newlib }}
+          GLIBC_INPUT=${{ github.event.inputs.glibc }}
+          
+          #triggered parameters
+          GCC_BRANCH=${GCC_INPUT:-"$GCC_BRANCH_DEFAULT"}
+          BINUTILS_BRANCH=${BINUTILS_INPUT:-"$BINUTILS_BRANCH_DEFAULT"}
+          NEWLIB_BRANCH=${NEWLIB_INPUT:-"$NEWLIB_BRANCH_DEFAULT"}
+          GLIBC_BRANCH=${GLIBC_INPUT:-"$GLIBC_BRANCH_DEFAULT"}
+
+          GCC_COMMIT=$(git ls-remote $GCC_REPO_URL $GCC_BRANCH  | awk '{print $1}')
+          BINUTILS_COMMIT=$(git ls-remote $BINUTILS_REPO_URL $BINUTILS_BRANCH | awk '{print $1}')
+          NEWLIB_COMMIT=$(git ls-remote $NEWLIB_REPO_URL $NEWLIB_BRANCH | awk '{print $1}')
+          GLIBC_COMMIT=$(git ls-remote $GLIBC_REPO_URL $GLIBC_BRANCH | awk '{print $1}')
+                    
+          printf "Using GCC from:\n\trepo: $GCC_REPO_URL\n\tbranch: $GCC_BRANCH\n\tcommit: $GCC_COMMIT\n"
+          printf "Using Binutils from:\n\trepo: $BINUTILS_REPO_URL\n\tbranch: $BINUTILS_BRANCH\n\tcommit: $BINUTILS_COMMIT\n"
+          printf "Using Newlib from:\n\trepo: $NEWLIB_REPO_URL\n\tbranch: $NEWLIB_BRANCH\n\tcommit: $NEWLIB_COMMIT\n"
+          printf "Using Glibc from:\n\trepo: $GLIBC_REPO_URL\n\tbranch: $GLIBC_BRANCH\n\tcommit: $GLIBC_COMMIT\n"
+
+          echo "::set-output name=GCC_COMMIT::$GCC_COMMIT"
+          echo "::set-output name=BINUTILS_COMMIT::$BINUTILS_COMMIT"
+          echo "::set-output name=NEWLIB_COMMIT::$NEWLIB_COMMIT"
+          echo "::set-output name=GLIBC_COMMIT::$GLIBC_COMMIT"   
 
   toolchains:
-    #needs: [ crosstool, tarballs ]
-    needs: [ crosstool ]
+    needs: [ crosstool, variables ]
     uses: ./.github/workflows/build-toolchains-arc.yml
     with:
+      gcc_commit:       ${{needs.variables.outputs.GCC_COMMIT}}
+      binutils_commit:  ${{needs.variables.outputs.BINUTILS_COMMIT}}"
+      newlib_commit:    ${{needs.variables.outputs.NEWLIB_COMMIT}}"
+      glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}"
       samples: >-
         [
           "snps-arc-arc700-linux-uclibc",
@@ -75,3 +128,4 @@ jobs:
           "snps-arc64-snps-native-gnu",
           "snps-arc64-unknown-elf"
         ]
+
