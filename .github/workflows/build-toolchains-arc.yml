@@ -54,6 +54,9 @@ jobs:
           echo "Newlib: ${{ inputs.newlib_commit }}"
           echo "Glibc: ${{ inputs.glibc_commit }}"
 
+          pwd
+          df
+
           pushd .local/share/crosstool-ng/samples/${{ matrix.sample }}
             sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.gcc_commit }}\"/"  crosstool.config
             sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"  crosstool.config
@@ -71,11 +74,13 @@ jobs:
           sed -i -e '/CT_LOCAL_TARBALLS_DIR/s/HOME/CT_TOP_DIR/' .config
           sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config
           ct-ng build
-      # - name: upload log
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: ${{ matrix.sample }}.${{ matrix.host }}.log
-      #     path: |
-      #       build.log
-      #       .config
-      #   if: ${{ always() }}
+      - name: upload log
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ matrix.sample }}.${{ matrix.host }}.log
+          path: |
+            build.log
+            .config
+          retention-days: 2
+        #if: ${{ always() }}
+        if: ${{ failure() }}

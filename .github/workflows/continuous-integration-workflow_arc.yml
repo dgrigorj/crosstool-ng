@@ -110,11 +110,11 @@ jobs:
       glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}
       samples: >-
         [
-          "snps-arc-archs-native-gnu",
-          "snps-arc-elf32-macos",
-          "snps-arc-elf32-win",
+          "snps-arc-arc700-linux-uclibc",
+          "snps-arc-archs-linux-gnu",
+          "snps-arc-archs-linux-uclibc",
           "snps-arc-multilib-elf32",
-          "snps-arc64-snps-native-gnu",
+          "snps-arc64-snps-linux-gnu",
           "snps-arc64-unknown-elf"
         ]
 
