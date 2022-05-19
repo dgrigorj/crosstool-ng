@@ -6,7 +6,7 @@ on:
       samples:
         description: Stringified JSON list of samples
         required: true
-        type: string    
+        type: string
       gcc_commit:
         description: GCC commit ID
         required: false

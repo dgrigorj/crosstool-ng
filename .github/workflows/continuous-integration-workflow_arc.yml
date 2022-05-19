@@ -62,7 +62,7 @@ jobs:
 
   variables:
     runs-on: ubuntu-latest
-    outputs:      
+    outputs:
       GCC_COMMIT: ${{ steps.variables.outputs.GCC_COMMIT }}
       BINUTILS_COMMIT: ${{ steps.variables.outputs.BINUTILS_COMMIT }}
       NEWLIB_COMMIT: ${{ steps.variables.outputs.NEWLIB_COMMIT }}
@@ -72,13 +72,13 @@ jobs:
         id: variables
         run: |
           echo "Setting Git variables"
-          
+
           #manual run parameters
           GCC_INPUT=${{ github.event.inputs.gcc }}
           BINUTILS_INPUT=${{ github.event.inputs.binutils }}
           NEWLIB_INPUT=${{ github.event.inputs.newlib }}
           GLIBC_INPUT=${{ github.event.inputs.glibc }}
-          
+
           #triggered parameters
           GCC_BRANCH=${GCC_INPUT:-"$GCC_BRANCH_DEFAULT"}
           BINUTILS_BRANCH=${BINUTILS_INPUT:-"$BINUTILS_BRANCH_DEFAULT"}
@@ -89,7 +89,7 @@ jobs:
           BINUTILS_COMMIT=$(git ls-remote $BINUTILS_REPO_URL $BINUTILS_BRANCH | awk '{print $1}')
           NEWLIB_COMMIT=$(git ls-remote $NEWLIB_REPO_URL $NEWLIB_BRANCH | awk '{print $1}')
           GLIBC_COMMIT=$(git ls-remote $GLIBC_REPO_URL $GLIBC_BRANCH | awk '{print $1}')
-                    
+
           printf "Using GCC from:\n\trepo: $GCC_REPO_URL\n\tbranch: $GCC_BRANCH\n\tcommit: $GCC_COMMIT\n"
           printf "Using Binutils from:\n\trepo: $BINUTILS_REPO_URL\n\tbranch: $BINUTILS_BRANCH\n\tcommit: $BINUTILS_COMMIT\n"
           printf "Using Newlib from:\n\trepo: $NEWLIB_REPO_URL\n\tbranch: $NEWLIB_BRANCH\n\tcommit: $NEWLIB_COMMIT\n"
@@ -98,7 +98,7 @@ jobs:
           echo "::set-output name=GCC_COMMIT::$GCC_COMMIT"
           echo "::set-output name=BINUTILS_COMMIT::$BINUTILS_COMMIT"
           echo "::set-output name=NEWLIB_COMMIT::$NEWLIB_COMMIT"
-          echo "::set-output name=GLIBC_COMMIT::$GLIBC_COMMIT"   
+          echo "::set-output name=GLIBC_COMMIT::$GLIBC_COMMIT"
 
   toolchains:
     needs: [ crosstool, variables ]
@@ -110,15 +110,23 @@ jobs:
       glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}
       samples: >-
         [
-          "snps-arc-arc700-linux-uclibc",
-          "snps-arc-archs-linux-gnu",
-          "snps-arc-archs-linux-uclibc",
           "snps-arc-archs-native-gnu",
           "snps-arc-elf32-macos",
           "snps-arc-elf32-win",
           "snps-arc-multilib-elf32",
-          "snps-arc64-snps-linux-gnu",
           "snps-arc64-snps-native-gnu",
           "snps-arc64-unknown-elf"
         ]
 
+        # [
+        #   "snps-arc-arc700-linux-uclibc",
+        #   "snps-arc-archs-linux-gnu",
+        #   "snps-arc-archs-linux-uclibc",
+        #   "snps-arc-archs-native-gnu",
+        #   "snps-arc-elf32-macos",
+        #   "snps-arc-elf32-win",
+        #   "snps-arc-multilib-elf32",
+        #   "snps-arc64-snps-linux-gnu",
+        #   "snps-arc64-snps-native-gnu",
+        #   "snps-arc64-unknown-elf"
+        # ]
