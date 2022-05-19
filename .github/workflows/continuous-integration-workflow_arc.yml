@@ -30,6 +30,12 @@ on:
         required:     false
         default:      arc64-2.34
         type:         string
+      uclibc:
+        description:  uClibc branch name
+        required:     false
+        default:      uclibc-arc32-wip
+        type:         string
+
 
 env:
   LINUX_REPO_URL:          "https://github.com/foss-for-synopsys-dwc-arc-processors/linux"
@@ -42,6 +48,8 @@ env:
   NEWLIB_BRANCH_DEFAULT:   "arc-2022.03"
   GLIBC_REPO_URL:          "https://github.com/foss-for-synopsys-dwc-arc-processors/glibc"
   GLIBC_BRANCH_DEFAULT:    "arc64-2.34"
+  UCLIBC_REPO_URL:         "https://github.com/foss-for-synopsys-dwc-arc-processors/uClibc"
+  UCLIBC_BRANCH_DEFAULT:   "uclibc-arc32-wip"
 
 
 jobs:
@@ -53,6 +61,7 @@ jobs:
       BINUTILS_COMMIT:  ${{ steps.variables.outputs.BINUTILS_COMMIT }}
       NEWLIB_COMMIT:    ${{ steps.variables.outputs.NEWLIB_COMMIT }}
       GLIBC_COMMIT:     ${{ steps.variables.outputs.GLIBC_COMMIT }}
+      UCLIBC_COMMIT:    ${{ steps.variables.outputs.UCLIBC_COMMIT }}
     steps:
       - name: Set github parameters
         id: variables
@@ -65,6 +74,7 @@ jobs:
           BINUTILS_INPUT=${{ github.event.inputs.binutils }}
           NEWLIB_INPUT=${{ github.event.inputs.newlib }}
           GLIBC_INPUT=${{ github.event.inputs.glibc }}
+          UCLIBC_INPUT=${{ github.event.inputs.uclibc }}
 
           #triggered parameters
           LINUX_BRANCH=${LINUX_INPUT:-"$LINUX_BRANCH_DEFAULT"}
@@ -72,24 +82,28 @@ jobs:
           BINUTILS_BRANCH=${BINUTILS_INPUT:-"$BINUTILS_BRANCH_DEFAULT"}
           NEWLIB_BRANCH=${NEWLIB_INPUT:-"$NEWLIB_BRANCH_DEFAULT"}
           GLIBC_BRANCH=${GLIBC_INPUT:-"$GLIBC_BRANCH_DEFAULT"}
+          UCLIBC_BRANCH=${UCLIBC_INPUT:-"$UCLIBC_BRANCH_DEFAULT"}
 
           LINUX_COMMIT=$(git ls-remote $LINUX_REPO_URL $LINUX_BRANCH  | awk '{print $1}')
           GCC_COMMIT=$(git ls-remote $GCC_REPO_URL $GCC_BRANCH  | awk '{print $1}')
           BINUTILS_COMMIT=$(git ls-remote $BINUTILS_REPO_URL $BINUTILS_BRANCH | awk '{print $1}')
           NEWLIB_COMMIT=$(git ls-remote $NEWLIB_REPO_URL $NEWLIB_BRANCH | awk '{print $1}')
           GLIBC_COMMIT=$(git ls-remote $GLIBC_REPO_URL $GLIBC_BRANCH | awk '{print $1}')
+          UCLIBC_COMMIT=$(git ls-remote $UCLIBC_REPO_URL $UCLIBC_BRANCH | awk '{print $1}')
 
           printf "Using Linux from:\n\trepo: $LINUX_REPO_URL\n\tbranch: $LINUX_BRANCH\n\tcommit: $LINUX_COMMIT\n"
           printf "Using GCC from:\n\trepo: $GCC_REPO_URL\n\tbranch: $GCC_BRANCH\n\tcommit: $GCC_COMMIT\n"
           printf "Using Binutils from:\n\trepo: $BINUTILS_REPO_URL\n\tbranch: $BINUTILS_BRANCH\n\tcommit: $BINUTILS_COMMIT\n"
           printf "Using Newlib from:\n\trepo: $NEWLIB_REPO_URL\n\tbranch: $NEWLIB_BRANCH\n\tcommit: $NEWLIB_COMMIT\n"
           printf "Using Glibc from:\n\trepo: $GLIBC_REPO_URL\n\tbranch: $GLIBC_BRANCH\n\tcommit: $GLIBC_COMMIT\n"
+          printf "Using uClibc from:\n\trepo: $UCLIBC_REPO_URL\n\tbranch: $UCLIBC_BRANCH\n\tcommit: $UCLIBC_COMMIT\n"
 
           echo "::set-output name=LINUX_COMMIT::$LINUX_COMMIT"
           echo "::set-output name=GCC_COMMIT::$GCC_COMMIT"
           echo "::set-output name=BINUTILS_COMMIT::$BINUTILS_COMMIT"
           echo "::set-output name=NEWLIB_COMMIT::$NEWLIB_COMMIT"
           echo "::set-output name=GLIBC_COMMIT::$GLIBC_COMMIT"
+          echo "::set-output name=UCLIBC_COMMIT::$UCLIBC_COMMIT"
 
   crosstool:
     needs: variables
@@ -112,6 +126,7 @@ jobs:
             sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"       $d/crosstool.config
             sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"  $d/crosstool.config
             sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
+            sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
             grep 'REVISION' $d/crosstool.config || true
           done
       - name: "build ct-ng"
@@ -178,7 +193,7 @@ jobs:
           "snps-arc-archs-linux-gnu",
           "snps-arc-archs-linux-uclibc",
           "snps-arc64-snps-linux-gnu",
-          "snps-arc-multilib-elf32",          
+          "snps-arc-multilib-elf32",
           "snps-arc64-unknown-elf"
         ]
 

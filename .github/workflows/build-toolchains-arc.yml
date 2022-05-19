@@ -7,23 +7,6 @@ on:
         description: Stringified JSON list of samples
         required: true
         type: string
-      # gcc_commit:
-      #   description: GCC commit ID
-      #   required: false
-      #   type: string
-      # binutils_commit:
-      #   description: Binutils commit ID
-      #   required: false
-      #   type: string
-      # newlib_commit:
-      #   description: Newlib commit ID
-      #   required: false
-      #   type: string
-      # glibc_commit:
-      #   description: glibc commit ID
-      #   required: false
-      #   type: string
-
 
 jobs:
   build:
@@ -53,21 +36,6 @@ jobs:
         run: |
           sudo apt-get install -y gperf help2man libtool-bin
           echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
-      # - name: Patch sample with input revisions
-      #   run: |
-      #     echo "GCC: ${{ inputs.gcc_commit }}"
-      #     echo "Binutils: ${{ inputs.binutils_commit }}"
-      #     echo "Newlib: ${{ inputs.newlib_commit }}"
-      #     echo "Glibc: ${{ inputs.glibc_commit }}"
-      #     pushd .local/share/crosstool-ng/samples/${{ matrix.sample }}
-      #       sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.gcc_commit }}\"/"  crosstool.config
-      #       sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"  crosstool.config
-      #       sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.binutils_commit }}\"/"  crosstool.config
-      #       sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.newlib_commit }}\"/"  crosstool.config
-      #       sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.newlib_commit }}\"/"  crosstool.config
-      #       sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ inputs.glibc_commit }}\"/"  crosstool.config
-      #     popd
-
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
           mkdir -p src
