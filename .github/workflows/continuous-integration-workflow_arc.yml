@@ -5,28 +5,35 @@ on:
   pull_request:
   workflow_dispatch:
     inputs:
+      linux:
+        description:  Linux branch name
+        required:     false
+        default:      arc64
+        type:         string
       gcc:
-        description: GCC branch name
-        required: false
-        default: arc-2022.03
-        type: string
+        description:  GCC branch name
+        required:     false
+        default:      arc-2022.03
+        type:         string
       binutils:
-        description: Binutils branch name
-        required: false
-        default: arc-2022.03
-        type: string
+        description:  Binutils branch name
+        required:     false
+        default:      arc-2022.03
+        type:         string
       newlib:
-        description: Newlib branch name
-        required: false
-        default: arc-2022.03
-        type: string
+        description:  Newlib branch name
+        required:     false
+        default:      arc-2022.03
+        type:         string
       glibc:
-        description: Glibc branch name
-        required: false
-        default: arc64-2.34
-        type: string
+        description:  Glibc branch name
+        required:     false
+        default:      arc64-2.34
+        type:         string
 
 env:
+  LINUX_REPO_URL:          "https://github.com/foss-for-synopsys-dwc-arc-processors/linux"
+  LINUX_BRANCH_DEFAULT:    "arc64"
   GCC_REPO_URL:            "https://github.com/foss-for-synopsys-dwc-arc-processors/gcc"
   GCC_BRANCH_DEFAULT:      "arc-2022.03"
   BINUTILS_REPO_URL:       "https://github.com/foss-for-synopsys-dwc-arc-processors/binutils-gdb"
@@ -38,7 +45,54 @@ env:
 
 
 jobs:
+  variables:
+    runs-on: ubuntu-latest
+    outputs:
+      LINUX_COMMIT:     ${{ steps.variables.outputs.LINUX_COMMIT }}
+      GCC_COMMIT:       ${{ steps.variables.outputs.GCC_COMMIT }}
+      BINUTILS_COMMIT:  ${{ steps.variables.outputs.BINUTILS_COMMIT }}
+      NEWLIB_COMMIT:    ${{ steps.variables.outputs.NEWLIB_COMMIT }}
+      GLIBC_COMMIT:     ${{ steps.variables.outputs.GLIBC_COMMIT }}
+    steps:
+      - name: Set github parameters
+        id: variables
+        run: |
+          echo "Setting Git variables"
+
+          #manual run parameters
+          LINUX_INPUT=${{ github.event.inputs.linux }}
+          GCC_INPUT=${{ github.event.inputs.gcc }}
+          BINUTILS_INPUT=${{ github.event.inputs.binutils }}
+          NEWLIB_INPUT=${{ github.event.inputs.newlib }}
+          GLIBC_INPUT=${{ github.event.inputs.glibc }}
+
+          #triggered parameters
+          LINUX_BRANCH=${LINUX_INPUT:-"$LINUX_BRANCH_DEFAULT"}
+          GCC_BRANCH=${GCC_INPUT:-"$GCC_BRANCH_DEFAULT"}
+          BINUTILS_BRANCH=${BINUTILS_INPUT:-"$BINUTILS_BRANCH_DEFAULT"}
+          NEWLIB_BRANCH=${NEWLIB_INPUT:-"$NEWLIB_BRANCH_DEFAULT"}
+          GLIBC_BRANCH=${GLIBC_INPUT:-"$GLIBC_BRANCH_DEFAULT"}
+
+          LINUX_COMMIT=$(git ls-remote $LINUX_REPO_URL $LINUX_BRANCH  | awk '{print $1}')
+          GCC_COMMIT=$(git ls-remote $GCC_REPO_URL $GCC_BRANCH  | awk '{print $1}')
+          BINUTILS_COMMIT=$(git ls-remote $BINUTILS_REPO_URL $BINUTILS_BRANCH | awk '{print $1}')
+          NEWLIB_COMMIT=$(git ls-remote $NEWLIB_REPO_URL $NEWLIB_BRANCH | awk '{print $1}')
+          GLIBC_COMMIT=$(git ls-remote $GLIBC_REPO_URL $GLIBC_BRANCH | awk '{print $1}')
+
+          printf "Using Linux from:\n\trepo: $LINUX_REPO_URL\n\tbranch: $LINUX_BRANCH\n\tcommit: $LINUX_COMMIT\n"
+          printf "Using GCC from:\n\trepo: $GCC_REPO_URL\n\tbranch: $GCC_BRANCH\n\tcommit: $GCC_COMMIT\n"
+          printf "Using Binutils from:\n\trepo: $BINUTILS_REPO_URL\n\tbranch: $BINUTILS_BRANCH\n\tcommit: $BINUTILS_COMMIT\n"
+          printf "Using Newlib from:\n\trepo: $NEWLIB_REPO_URL\n\tbranch: $NEWLIB_BRANCH\n\tcommit: $NEWLIB_COMMIT\n"
+          printf "Using Glibc from:\n\trepo: $GLIBC_REPO_URL\n\tbranch: $GLIBC_BRANCH\n\tcommit: $GLIBC_COMMIT\n"
+
+          echo "::set-output name=LINUX_COMMIT::$LINUX_COMMIT"
+          echo "::set-output name=GCC_COMMIT::$GCC_COMMIT"
+          echo "::set-output name=BINUTILS_COMMIT::$BINUTILS_COMMIT"
+          echo "::set-output name=NEWLIB_COMMIT::$NEWLIB_COMMIT"
+          echo "::set-output name=GLIBC_COMMIT::$GLIBC_COMMIT"
+
   crosstool:
+    needs: [ variables ]
     runs-on: ubuntu-latest
     steps:
       - name: "clone"
@@ -47,6 +101,20 @@ jobs:
         if: ${{ runner.os == 'Linux' }}
         run: |
           sudo apt-get install -y gperf help2man libtool-bin
+      - name: Update components Git revisions
+        run: |
+          echo "Patching component revisions"
+          for d in $(find ./samples -type d | grep snps-) ; do
+            sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.LINUX_COMMIT }}\"/"         $d/crosstool.config
+            sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GCC_COMMIT }}\"/"             $d/crosstool.config
+            sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"   $d/crosstool.config
+            sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"        $d/crosstool.config
+            sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"       $d/crosstool.config
+            sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"  $d/crosstool.config
+            sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
+            cat $d/crosstool.config | grep REVISION
+          done
+
       - name: "build ct-ng"
         run: |
           ./bootstrap
@@ -60,73 +128,42 @@ jobs:
           name: crosstool.ubuntu-latest
           path: ct-ng.tar
 
-  variables:
-    runs-on: ubuntu-latest
-    outputs:
-      GCC_COMMIT: ${{ steps.variables.outputs.GCC_COMMIT }}
-      BINUTILS_COMMIT: ${{ steps.variables.outputs.BINUTILS_COMMIT }}
-      NEWLIB_COMMIT: ${{ steps.variables.outputs.NEWLIB_COMMIT }}
-      GLIBC_COMMIT: ${{ steps.variables.outputs.GLIBC_COMMIT }}
-    steps:
-      - name: Set github parameters
-        id: variables
-        run: |
-          echo "Setting Git variables"
 
-          #manual run parameters
-          GCC_INPUT=${{ github.event.inputs.gcc }}
-          BINUTILS_INPUT=${{ github.event.inputs.binutils }}
-          NEWLIB_INPUT=${{ github.event.inputs.newlib }}
-          GLIBC_INPUT=${{ github.event.inputs.glibc }}
 
-          #triggered parameters
-          GCC_BRANCH=${GCC_INPUT:-"$GCC_BRANCH_DEFAULT"}
-          BINUTILS_BRANCH=${BINUTILS_INPUT:-"$BINUTILS_BRANCH_DEFAULT"}
-          NEWLIB_BRANCH=${NEWLIB_INPUT:-"$NEWLIB_BRANCH_DEFAULT"}
-          GLIBC_BRANCH=${GLIBC_INPUT:-"$GLIBC_BRANCH_DEFAULT"}
 
-          GCC_COMMIT=$(git ls-remote $GCC_REPO_URL $GCC_BRANCH  | awk '{print $1}')
-          BINUTILS_COMMIT=$(git ls-remote $BINUTILS_REPO_URL $BINUTILS_BRANCH | awk '{print $1}')
-          NEWLIB_COMMIT=$(git ls-remote $NEWLIB_REPO_URL $NEWLIB_BRANCH | awk '{print $1}')
-          GLIBC_COMMIT=$(git ls-remote $GLIBC_REPO_URL $GLIBC_BRANCH | awk '{print $1}')
 
-          printf "Using GCC from:\n\trepo: $GCC_REPO_URL\n\tbranch: $GCC_BRANCH\n\tcommit: $GCC_COMMIT\n"
-          printf "Using Binutils from:\n\trepo: $BINUTILS_REPO_URL\n\tbranch: $BINUTILS_BRANCH\n\tcommit: $BINUTILS_COMMIT\n"
-          printf "Using Newlib from:\n\trepo: $NEWLIB_REPO_URL\n\tbranch: $NEWLIB_BRANCH\n\tcommit: $NEWLIB_COMMIT\n"
-          printf "Using Glibc from:\n\trepo: $GLIBC_REPO_URL\n\tbranch: $GLIBC_BRANCH\n\tcommit: $GLIBC_COMMIT\n"
 
-          echo "::set-output name=GCC_COMMIT::$GCC_COMMIT"
-          echo "::set-output name=BINUTILS_COMMIT::$BINUTILS_COMMIT"
-          echo "::set-output name=NEWLIB_COMMIT::$NEWLIB_COMMIT"
-          echo "::set-output name=GLIBC_COMMIT::$GLIBC_COMMIT"
 
-  toolchains:
-    needs: [ crosstool, variables ]
-    uses: ./.github/workflows/build-toolchains-arc.yml
-    with:
-      gcc_commit:       ${{needs.variables.outputs.GCC_COMMIT}}
-      binutils_commit:  ${{needs.variables.outputs.BINUTILS_COMMIT}}
-      newlib_commit:    ${{needs.variables.outputs.NEWLIB_COMMIT}}
-      glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}
-      samples: >-
-        [
-          "snps-arc-arc700-linux-uclibc",
-          "snps-arc-archs-linux-gnu",
-          "snps-arc-archs-linux-uclibc",
-          "snps-arc-multilib-elf32",
-          "snps-arc64-snps-linux-gnu",
-          "snps-arc64-unknown-elf"
-        ]
 
-        # [
-        #   "snps-arc-arc700-linux-uclibc",
-        #   "snps-arc-archs-linux-gnu",
-        #   "snps-arc-archs-linux-uclibc",
-        #   "snps-arc-archs-native-gnu",
-        #   "snps-arc-elf32-macos",
-        #   "snps-arc-elf32-win",
-        #   "snps-arc-multilib-elf32",
-        #   "snps-arc64-snps-linux-gnu",
-        #   "snps-arc64-snps-native-gnu",
-        #   "snps-arc64-unknown-elf"
-        # ]
+
+
+  # toolchains:
+  #   needs: [ crosstool ]
+  #   uses: ./.github/workflows/build-toolchains-arc.yml
+  #   with:
+  #     gcc_commit:       ${{needs.variables.outputs.GCC_COMMIT}}
+  #     binutils_commit:  ${{needs.variables.outputs.BINUTILS_COMMIT}}
+  #     newlib_commit:    ${{needs.variables.outputs.NEWLIB_COMMIT}}
+  #     glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}
+  #     samples: >-
+  #       [
+  #         "snps-arc-arc700-linux-uclibc",
+  #         "snps-arc-archs-linux-gnu",
+  #         "snps-arc-archs-linux-uclibc",
+  #         "snps-arc-multilib-elf32",
+  #         "snps-arc64-snps-linux-gnu",
+  #         "snps-arc64-unknown-elf"
+  #       ]
+
+  #       # [
+  #       #   "snps-arc-arc700-linux-uclibc",
+  #       #   "snps-arc-archs-linux-gnu",
+  #       #   "snps-arc-archs-linux-uclibc",
+  #       #   "snps-arc-archs-native-gnu",
+  #       #   "snps-arc-elf32-macos",
+  #       #   "snps-arc-elf32-win",
+  #       #   "snps-arc-multilib-elf32",
+  #       #   "snps-arc64-snps-linux-gnu",
+  #       #   "snps-arc64-snps-native-gnu",
+  #       #   "snps-arc64-unknown-elf"
+  #       # ]
