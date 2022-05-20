@@ -165,12 +165,15 @@ jobs:
       - name: "ct-ng source"
         run: |
           mkdir -p src
-          ct-ng snps-arc64-snps-linux-gnu
-          sed -i -e '/CT_LOG_PROGRESS_BAR/s/y$/n/' .config
-          sed -i -e '/CT_LOCAL_TARBALLS_DIR/s/HOME/CT_TOP_DIR/' .config
-          sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config
-          ct-ng olddefconfig
-          ct-ng source
+          for sample in snps-arc-archs-linux-gnu snps-arc-archs-linux-uclibc\
+                snps-arc-multilib-elf32 ; do \
+                ct-ng $sample; \
+                sed -i -e '/CT_LOG_PROGRESS_BAR/s/y$/n/' .config; \
+                sed -i -e '/CT_LOCAL_TARBALLS_DIR/s/HOME/CT_TOP_DIR/' .config; \
+                sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config; \
+                ct-ng olddefconfig; \
+                ct-ng source; \
+          done
           tar -cvf src.tar src
       - name: "upload sources"
         uses: actions/upload-artifact@v2
@@ -183,17 +186,16 @@ jobs:
     needs: [ tarballs ]
     uses: ./.github/workflows/build-toolchains-arc.yml
     with:
-      # gcc_commit:       ${{needs.variables.outputs.GCC_COMMIT}}
-      # binutils_commit:  ${{needs.variables.outputs.BINUTILS_COMMIT}}
-      # newlib_commit:    ${{needs.variables.outputs.NEWLIB_COMMIT}}
-      # glibc_commit:     ${{needs.variables.outputs.GLIBC_COMMIT}}
       samples: >-
         [
           "snps-arc-arc700-linux-uclibc",
           "snps-arc-archs-linux-gnu",
           "snps-arc-archs-linux-uclibc",
+          "snps-arc32-snps-linux-gnu",
+          "snps-arc32-snps-linux-uclibc",
           "snps-arc64-snps-linux-gnu",
           "snps-arc-multilib-elf32",
+          "snps-arceb-multilib-elf32",
           "snps-arc64-unknown-elf"
         ]
 

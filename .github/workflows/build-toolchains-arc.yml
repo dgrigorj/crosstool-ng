@@ -38,6 +38,7 @@ jobs:
           echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
+          df
           mkdir -p src
           ct-ng ${{ matrix.sample }}
           sed -i -e '/CT_LOG_PROGRESS_BAR/s/y$/n/' .config
