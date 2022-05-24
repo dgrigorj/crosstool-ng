@@ -188,15 +188,16 @@ jobs:
     with:
       samples: >-
         [
-          "snps-arc-arc700-linux-uclibc",
-          "snps-arc-archs-linux-gnu",
-          "snps-arc-archs-linux-uclibc",
-          "snps-arc32-snps-linux-gnu",
+          # "snps-arc-arc700-linux-uclibc",
+          # "snps-arc-archs-linux-gnu",
+          # "snps-arc-archs-linux-uclibc",
+          # "snps-arc32-snps-linux-gnu",
           "snps-arc32-snps-linux-uclibc",
-          "snps-arc64-snps-linux-gnu",
-          "snps-arc-multilib-elf32",
-          "snps-arceb-multilib-elf32",
-          "snps-arc64-unknown-elf"
+          "snps-x86_64-w64-mingw32"
+          # "snps-arc64-snps-linux-gnu",
+          # "snps-arc-multilib-elf32",
+          # "snps-arceb-multilib-elf32",
+          # "snps-arc64-unknown-elf"
         ]
 
   #       # [
@@ -211,3 +212,12 @@ jobs:
   #       #   "snps-arc64-snps-native-gnu",
   #       #   "snps-arc64-unknown-elf"
   #       # ]
+
+
+  # canadian-cross:
+  #   needs: [ toolchains ]
+  #   uses: ./.github/workflows/build-toolchains.yml
+  #   with:
+  #     samples: >-
+  #       ["x86_64-w64-mingw32,x86_64-pc-linux-gnu"]
+  #     canadian-cross: true
