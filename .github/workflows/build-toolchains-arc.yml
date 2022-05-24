@@ -43,35 +43,30 @@ jobs:
           sudo apt-get install -y gperf help2man libtool-bin
           echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
 
-
-
       - name: download x86_64-w64-mingw32.${{ matrix.host }} tarball
-        if: ${{ inputs.canadian-cross && (matrix.sample == 'arc64-elf-win') }}
+        if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc64-elf-win') }}
         uses: actions/download-artifact@v2
         with:
           name: x86_64-w64-mingw32.${{ matrix.host }}.tar
       - name: install x86_64-w64-mingw32.${{ matrix.host }} toolchain
-        if: ${{ inputs.canadian-cross && (matrix.sample == 'arc64-elf-win') }}
+        if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc64-elf-win') }}
         run: |
           mkdir -p ${{ github.workspace }}/x86_64-w64-mingw32
           tar -C ${{ github.workspace }}/x86_64-w64-mingw32 \
               -xf x86_64-w64-mingw32.${{ matrix.host }}.tar
           echo "${{ github.workspace }}/x86_64-w64-mingw32/bin" >> $GITHUB_PATH
-
-      - name: download snps-i686-w64-mingw32.${{ matrix.host }} tarball
+      - name: download i686-w64-mingw32.${{ matrix.host }} tarball
         if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc-elf32-win') }}
         uses: actions/download-artifact@v2
         with:
-          name: snps-i686-w64-mingw32.${{ matrix.host }}.tar
-      - name: install snps-i686-w64-mingw32.${{ matrix.host }} toolchain
+          name: i686-w64-mingw32.${{ matrix.host }}.tar
+      - name: install i686-w64-mingw32.${{ matrix.host }} toolchain
         if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc-elf32-win') }}
         run: |
-          mkdir -p ${{ github.workspace }}/snps-i686-w64-mingw32
-          tar -C ${{ github.workspace }}/snps-i686-w64-mingw32 \
-              -xf snps-i686-w64-mingw32.${{ matrix.host }}.tar
-          echo "${{ github.workspace }}/snps-i686-w64-mingw32/bin" >> $GITHUB_PATH
-
-
+          mkdir -p ${{ github.workspace }}/i686-w64-mingw32
+          tar -C ${{ github.workspace }}/i686-w64-mingw32 \
+              -xf i686-w64-mingw32.${{ matrix.host }}.tar
+          echo "${{ github.workspace }}/i686-w64-mingw32/bin" >> $GITHUB_PATH
 
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
@@ -83,18 +78,23 @@ jobs:
           sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config
           ct-ng build
 
-      - name: create ${{ matrix.sample }}.${{ matrix.host }} tarball
-        if: ${{ (matrix.sample == 'x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+      - name: set mingw32 name to environment variable
+        if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
         run: |
-          tar -C ${{ github.workspace }}/x-tools/${{ matrix.sample }} \
-              -cf ${{ matrix.sample }}.${{ matrix.host }}.tar .
-      - name: upload ${{ matrix.sample }}.${{ matrix.host }} tarball
-        if: ${{ (matrix.sample == 'x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+          SAMPLE=${{ matrix.sample }}          
+          echo "MINGW32=${SAMPLE#snps-}" >> $GITHUB_ENV
+      - name: create ${{ env.MINGW32 }}.${{ matrix.host }} tarball
+        if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+        run: |
+          tar -C ${{ github.workspace }}/x-tools/${{ env.MINGW32 }} \
+              -cf ${{ env.MINGW32 }}.${{ matrix.host }}.tar .
+      - name: upload ${{ env.MINGW32 }}.${{ matrix.host }} tarball
+        if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.sample }}.${{ matrix.host }}.tar
+          name: ${{ env.MINGW32 }}.${{ matrix.host }}.tar
           path: |
-            ${{ matrix.sample }}.${{ matrix.host }}.tar
+            ${{ env.MINGW32 }}.${{ matrix.host }}.tar
 
 
       - name: upload log
