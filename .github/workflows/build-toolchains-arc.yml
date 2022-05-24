@@ -7,6 +7,12 @@ on:
         description: Stringified JSON list of samples
         required: true
         type: string
+      canadian-cross:
+        description: Build Canadian Cross toolchain(x86_64-w64-mingw32)
+        default: false
+        required: false
+        type: boolean
+
 
 jobs:
   build:
@@ -36,6 +42,20 @@ jobs:
         run: |
           sudo apt-get install -y gperf help2man libtool-bin
           echo "${{ github.workspace }}/.local/bin" >> $GITHUB_PATH
+
+      - name: download x86_64-w64-mingw32.${{ matrix.host }} tarball
+        if: ${{ inputs.canadian-cross }}
+        uses: actions/download-artifact@v2
+        with:
+          name: x86_64-w64-mingw32.${{ matrix.host }}.tar
+      - name: install x86_64-w64-mingw32.${{ matrix.host }} toolchain
+        if: ${{ inputs.canadian-cross }}
+        run: |
+          mkdir -p ${{ github.workspace }}/x86_64-w64-mingw32
+          tar -C ${{ github.workspace }}/x86_64-w64-mingw32 \
+              -xf x86_64-w64-mingw32.${{ matrix.host }}.tar
+          echo "${{ github.workspace }}/x86_64-w64-mingw32/bin" >> $GITHUB_PATH
+
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
           df
@@ -45,6 +65,20 @@ jobs:
           sed -i -e '/CT_LOCAL_TARBALLS_DIR/s/HOME/CT_TOP_DIR/' .config
           sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config
           ct-ng build
+
+      - name: create ${{ matrix.sample }}.${{ matrix.host }} tarball
+        if: ${{ matrix.sample == 'x86_64-w64-mingw32' }}
+        run: |
+          tar -C ${{ github.workspace }}/x-tools/${{ matrix.sample }} \
+              -cf ${{ matrix.sample }}.${{ matrix.host }}.tar .
+      - name: upload ${{ matrix.sample }}.${{ matrix.host }} tarball
+        if: ${{ matrix.sample == 'x86_64-w64-mingw32' }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: x86_64-w64-mingw32.${{ matrix.host }}.tar
+          path: |
+            x86_64-w64-mingw32.${{ matrix.host }}.tar
+
       - name: upload log
         uses: actions/upload-artifact@v2
         with:

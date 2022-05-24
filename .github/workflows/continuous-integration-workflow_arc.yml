@@ -188,10 +188,9 @@ jobs:
     with:
       samples: >-
         [
-          "snps-x86_64-w64-mingw32"
+          "snps-x86_64-w64-mingw32",
+          "snps-i686-w64-mingw32"
         ]
-
-
 
   #       [
   #        "snps-arc-arc700-linux-uclibc",
@@ -212,10 +211,10 @@ jobs:
   #        ]
 
 
-  # canadian-cross:
-  #   needs: [ toolchains ]
-  #   uses: ./.github/workflows/build-toolchains.yml
-  #   with:
-  #     samples: >-
-  #       ["x86_64-w64-mingw32,x86_64-pc-linux-gnu"]
-  #     canadian-cross: true
+  canadian-cross:
+    needs: [ toolchains ]
+    uses: ./.github/workflows/build-toolchains.yml
+    with:
+      samples: >-
+        ["snps-arc-elf32-win"]
+      canadian-cross: true
