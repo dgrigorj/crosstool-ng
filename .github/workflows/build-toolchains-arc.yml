@@ -46,12 +46,12 @@ jobs:
 
 
       - name: download x86_64-w64-mingw32.${{ matrix.host }} tarball
-        if: ${{ inputs.canadian-cross && (${{ matrix.sample }} == 'arc64-elf-win' ) }}
+        if: ${{ inputs.canadian-cross && (matrix.sample == 'arc64-elf-win') }}
         uses: actions/download-artifact@v2
         with:
           name: x86_64-w64-mingw32.${{ matrix.host }}.tar
       - name: install x86_64-w64-mingw32.${{ matrix.host }} toolchain
-        if: ${{ inputs.canadian-cross && (${{ matrix.sample }} == 'arc64-elf-win' ) }}
+        if: ${{ inputs.canadian-cross && (matrix.sample == 'arc64-elf-win') }}
         run: |
           mkdir -p ${{ github.workspace }}/x86_64-w64-mingw32
           tar -C ${{ github.workspace }}/x86_64-w64-mingw32 \
@@ -59,12 +59,12 @@ jobs:
           echo "${{ github.workspace }}/x86_64-w64-mingw32/bin" >> $GITHUB_PATH
 
       - name: download snps-i686-w64-mingw32.${{ matrix.host }} tarball
-        if: ${{ inputs.canadian-cross && (${{ matrix.sample }} == 'snps-arc-elf32-win' ) }}
+        if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc-elf32-win') }}
         uses: actions/download-artifact@v2
         with:
           name: snps-i686-w64-mingw32.${{ matrix.host }}.tar
       - name: install snps-i686-w64-mingw32.${{ matrix.host }} toolchain
-        if: ${{ inputs.canadian-cross && (${{ matrix.sample }} == 'snps-arc-elf32-win' ) }}
+        if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc-elf32-win') }}
         run: |
           mkdir -p ${{ github.workspace }}/snps-i686-w64-mingw32
           tar -C ${{ github.workspace }}/snps-i686-w64-mingw32 \
