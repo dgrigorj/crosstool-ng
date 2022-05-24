@@ -213,7 +213,7 @@ jobs:
 
   canadian-cross:
     needs: [ toolchains ]
-    uses: ./.github/workflows/build-toolchains.yml
+    uses: ./.github/workflows/build-toolchains-arc.yml
     with:
       samples: >-
         ["snps-arc-elf32-win"]
