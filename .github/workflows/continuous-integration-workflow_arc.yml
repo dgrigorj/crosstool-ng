@@ -188,30 +188,28 @@ jobs:
     with:
       samples: >-
         [
-          # "snps-arc-arc700-linux-uclibc",
-          # "snps-arc-archs-linux-gnu",
-          # "snps-arc-archs-linux-uclibc",
-          # "snps-arc32-snps-linux-gnu",
-          "snps-arc32-snps-linux-uclibc",
           "snps-x86_64-w64-mingw32"
-          # "snps-arc64-snps-linux-gnu",
-          # "snps-arc-multilib-elf32",
-          # "snps-arceb-multilib-elf32",
-          # "snps-arc64-unknown-elf"
         ]
 
-  #       # [
-  #       #   "snps-arc-arc700-linux-uclibc",
-  #       #   "snps-arc-archs-linux-gnu",
-  #       #   "snps-arc-archs-linux-uclibc",
-  #       #   "snps-arc-archs-native-gnu",
-  #       #   "snps-arc-elf32-macos",
-  #       #   "snps-arc-elf32-win",
-  #       #   "snps-arc-multilib-elf32",
-  #       #   "snps-arc64-snps-linux-gnu",
-  #       #   "snps-arc64-snps-native-gnu",
-  #       #   "snps-arc64-unknown-elf"
-  #       # ]
+
+
+  #       [
+  #        "snps-arc-arc700-linux-uclibc",
+  #        "snps-arc-archs-linux-gnu",
+  #        "snps-arc-archs-linux-uclibc",
+  #        "snps-arc32-snps-linux-gnu",
+  #        "snps-arc32-snps-linux-uclibc",
+  #        "snps-x86_64-w64-mingw32"
+  #        "snps-arc64-snps-linux-gnu",
+  #        "snps-arc-multilib-elf32",
+  #        "snps-arceb-multilib-elf32",
+  #        "snps-arc64-unknown-elf"
+
+  #        "snps-arc-archs-native-gnu",
+  #        "snps-arc-elf32-macos",
+  #        "snps-arc-elf32-win",
+  #        "snps-arc64-snps-native-gnu",
+  #        ]
 
 
   # canadian-cross:
