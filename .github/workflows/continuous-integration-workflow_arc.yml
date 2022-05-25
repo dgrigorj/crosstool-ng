@@ -196,22 +196,22 @@ jobs:
           path: src.tar
           retention-days: 2
 
-  toolchains:
-    needs: [ tarballs ]
-    uses: ./.github/workflows/build-toolchains-arc.yml
-    with:
-      samples: >-
-        [
-          "snps-arc-arc700-linux-uclibc",
-          "snps-arc-archs-linux-uclibc",
-          "snps-arc-archs-linux-gnu",
-          "snps-arc32-snps-linux-uclibc",
-          "snps-arc32-snps-linux-gnu",
-          "snps-arc64-snps-linux-gnu",
-          "snps-arc-multilib-elf32",
-          "snps-arceb-multilib-elf32",
-          "snps-arc64-unknown-elf"
-        ]
+  # toolchains:
+  #   needs: [ tarballs ]
+  #   uses: ./.github/workflows/build-toolchains-arc.yml
+  #   with:
+  #     samples: >-
+  #       [
+  #         "snps-arc-arc700-linux-uclibc",
+  #         "snps-arc-archs-linux-uclibc",
+  #         "snps-arc-archs-linux-gnu",
+  #         "snps-arc32-snps-linux-uclibc",
+  #         "snps-arc32-snps-linux-gnu",
+  #         "snps-arc64-snps-linux-gnu",
+  #         "snps-arc-multilib-elf32",
+  #         "snps-arceb-multilib-elf32",
+  #         "snps-arc64-unknown-elf"
+  #       ]
 
   #       [
   #        "snps-arc-arc700-linux-uclibc",

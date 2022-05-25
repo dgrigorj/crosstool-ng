@@ -20,8 +20,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        host: [ "ubuntu-latest" ]
         sample: ${{ fromJSON(inputs.samples) }}
+        host: [ "ubuntu-latest" ]
     steps:
       - name: download ct-ng
         uses: actions/download-artifact@v2
