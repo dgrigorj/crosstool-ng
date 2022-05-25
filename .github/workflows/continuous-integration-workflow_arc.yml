@@ -40,8 +40,10 @@ on:
 env:
   LINUX_REPO_URL:          "https://github.com/foss-for-synopsys-dwc-arc-processors/linux"
   LINUX_BRANCH_DEFAULT:    "arc64"
-  GCC_REPO_URL:            "https://github.com/foss-for-synopsys-dwc-arc-processors/gcc"
-  GCC_BRANCH_DEFAULT:      "arc-2022.03"
+#  GCC_REPO_URL:            "https://github.com/foss-for-synopsys-dwc-arc-processors/gcc"
+#  GCC_BRANCH_DEFAULT:      "arc-2022.03"
+  GCC_REPO_URL:            "https://github.com/dgrigorj/gcc.git"
+  GCC_BRANCH_DEFAULT:      "dgrigorj-arc-config-limit"
   BINUTILS_REPO_URL:       "https://github.com/foss-for-synopsys-dwc-arc-processors/binutils-gdb"
   BINUTILS_BRANCH_DEFAULT: "arc-2022.03"
   NEWLIB_REPO_URL:         "https://github.com/foss-for-synopsys-dwc-arc-processors/newlib"
@@ -188,6 +190,9 @@ jobs:
     with:
       samples: >-
         [
+          "snps-arc-multilib-elf32",
+          "snps-arceb-multilib-elf32",
+          "snps-arc64-unknown-elf",
           "snps-x86_64-w64-mingw32",
           "snps-i686-w64-mingw32"
         ]
@@ -202,7 +207,10 @@ jobs:
   #        "snps-arc64-snps-linux-gnu",
   #        "snps-arc-multilib-elf32",
   #        "snps-arceb-multilib-elf32",
-  #        "snps-arc64-unknown-elf"
+  #        "snps-arc64-unknown-elf",
+  #        "snps-x86_64-w64-mingw32",
+  #        "snps-i686-w64-mingw32"
+
 
   #        "snps-arc-archs-native-gnu",
   #        "snps-arc-elf32-macos",
