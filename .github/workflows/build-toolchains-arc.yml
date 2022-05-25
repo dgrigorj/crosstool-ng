@@ -56,12 +56,12 @@ jobs:
               -xf x86_64-w64-mingw32.${{ matrix.host }}.tar
           echo "${{ github.workspace }}/x86_64-w64-mingw32/bin" >> $GITHUB_PATH
       - name: download i686-w64-mingw32.${{ matrix.host }} tarball
-        if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc-elf32-win') }}
+        if: ${{ inputs.canadian-cross && ((matrix.sample == 'snps-arc-elf32-win') || (matrix.sample == 'snps-arceb-elf32-win')) }}
         uses: actions/download-artifact@v2
         with:
           name: i686-w64-mingw32.${{ matrix.host }}.tar
       - name: install i686-w64-mingw32.${{ matrix.host }} toolchain
-        if: ${{ inputs.canadian-cross && (matrix.sample == 'snps-arc-elf32-win') }}
+        if: ${{ inputs.canadian-cross && ((matrix.sample == 'snps-arc-elf32-win') || (matrix.sample == 'snps-arceb-elf32-win')) }}
         run: |
           mkdir -p ${{ github.workspace }}/i686-w64-mingw32
           tar -C ${{ github.workspace }}/i686-w64-mingw32 \
@@ -105,5 +105,5 @@ jobs:
             build.log
             .config
           retention-days: 2
-        #if: ${{ always() }}
-        if: ${{ failure() }}
+        if: ${{ always() }}
+        #if: ${{ failure() }}

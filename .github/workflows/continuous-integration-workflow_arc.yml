@@ -141,6 +141,7 @@ jobs:
             sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
 
             grep 'REVISION\|DEVEL_URL' $d/crosstool.config || true
+            echo "-----"
           done
       - name: "build ct-ng"
         run: |
@@ -157,7 +158,7 @@ jobs:
 
 
   tarballs:
-    needs: crosstool
+    needs: [ crosstool ]
     runs-on: ${{ matrix.host }}
     strategy:
       matrix:
@@ -201,39 +202,57 @@ jobs:
     with:
       samples: >-
         [
+          "snps-arc-arc700-linux-uclibc",
+          "snps-arc-archs-linux-uclibc",
+          "snps-arc-archs-linux-gnu",
+          "snps-arc32-snps-linux-uclibc",
+          "snps-arc32-snps-linux-gnu",
+          "snps-arc64-snps-linux-gnu",
           "snps-arc-multilib-elf32",
           "snps-arceb-multilib-elf32",
-          "snps-arc64-unknown-elf",
-          "snps-x86_64-w64-mingw32",
-          "snps-i686-w64-mingw32"
+          "snps-arc64-unknown-elf"
         ]
 
   #       [
   #        "snps-arc-arc700-linux-uclibc",
-  #        "snps-arc-archs-linux-gnu",
   #        "snps-arc-archs-linux-uclibc",
-  #        "snps-arc32-snps-linux-gnu",
+  #        "snps-arc-archs-linux-gnu",
   #        "snps-arc32-snps-linux-uclibc",
-  #        "snps-x86_64-w64-mingw32"
+  #        "snps-arc32-snps-linux-gnu",
   #        "snps-arc64-snps-linux-gnu",
+
   #        "snps-arc-multilib-elf32",
   #        "snps-arceb-multilib-elf32",
   #        "snps-arc64-unknown-elf",
-  #        "snps-x86_64-w64-mingw32",
-  #        "snps-i686-w64-mingw32"
 
+  #        "snps-arc-elf32-win",
+  #        "snps-arceb-elf32-win",
+  #        "snps-arc64-elf-win",
 
   #        "snps-arc-archs-native-gnu",
   #        "snps-arc-elf32-macos",
-  #        "snps-arc-elf32-win",
   #        "snps-arc64-snps-native-gnu",
   #        ]
 
-
-  canadian-cross:
-    needs: [ toolchains ]
+  mingw32:
+    needs: [ tarballs ]
     uses: ./.github/workflows/build-toolchains-arc.yml
     with:
       samples: >-
-        ["snps-arc-elf32-win"]
+        [
+          "snps-x86_64-w64-mingw32",
+          "snps-i686-w64-mingw32"
+        ]
+
+
+  canadian-cross:
+    needs: [ mingw32 ]
+    uses: ./.github/workflows/build-toolchains-arc.yml
+    with:
+      samples: >-
+        [
+          "snps-arc-elf32-win",
+          "snps-arceb-elf32-win",
+          "snps-arc64-elf-win"
+        ]
       canadian-cross: true
