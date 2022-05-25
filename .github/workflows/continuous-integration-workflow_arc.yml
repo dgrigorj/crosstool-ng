@@ -42,7 +42,7 @@ env:
   LINUX_BRANCH_DEFAULT:    "arc64"
 #  GCC_REPO_URL:            "https://github.com/foss-for-synopsys-dwc-arc-processors/gcc"
 #  GCC_BRANCH_DEFAULT:      "arc-2022.03"
-  GCC_REPO_URL:            "https://github.com/dgrigorj/gcc.git"
+  GCC_REPO_URL:            "https://github.com/dgrigorj/gcc"
   GCC_BRANCH_DEFAULT:      "dgrigorj-arc-config-limit"
   BINUTILS_REPO_URL:       "https://github.com/foss-for-synopsys-dwc-arc-processors/binutils-gdb"
   BINUTILS_BRANCH_DEFAULT: "arc-2022.03"
@@ -122,7 +122,14 @@ jobs:
           for d in $(find ./samples -type d | grep snps-) ; do
             echo "Patching config for sample: $d"
 
-            sed -i -e "/CT_GCC_DEVEL_URL=/s/\".*\"/\"${GCC_REPO_URL}\"/"                                            $d/crosstool.config
+            sed -i -e "/CT_LINUX_DEVEL_URL=/s/\".*\"/\"${LINUX_REPO_URL//\//\\/}.git\"/g"                           $d/crosstool.config
+            sed -i -e "/CT_GCC_DEVEL_URL=/s/\".*\"/\"${GCC_REPO_URL//\//\\/}.git\"/g"                               $d/crosstool.config
+            sed -i -e "/CT_BINUTILS_DEVEL_URL=/s/\".*\"/\"${BINUTILS_REPO_URL//\//\\/}.git\"/g"                     $d/crosstool.config
+            sed -i -e "/CT_GDB_DEVEL_URL=/s/\".*\"/\"${BINUTILS_REPO_URL//\//\\/}.git\"/g"                          $d/crosstool.config
+            sed -i -e "/CT_NEWLIB_DEVEL_URL=/s/\".*\"/\"${NEWLIB_REPO_URL//\//\\/}.git\"/g"                         $d/crosstool.config
+            sed -i -e "/CT_NEWLIB_NANO_DEVEL_URL=/s/\".*\"/\"${NEWLIB_REPO_URL//\//\\/}.git\"/g"                    $d/crosstool.config
+            sed -i -e "/CT_GLIBC_DEVEL_URL=/s/\".*\"/\"${GLIBC_REPO_URL//\//\\/}.git\"/g"                           $d/crosstool.config
+            sed -i -e "/CT_UCLIBC_NG_DEVEL_URL=/s/\".*\"/\"${UCLIBC_REPO_URL//\//\\/}.git\"/g"                      $d/crosstool.config
 
             sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.LINUX_COMMIT }}\"/"         $d/crosstool.config
             sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GCC_COMMIT }}\"/"             $d/crosstool.config
@@ -132,7 +139,8 @@ jobs:
             sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"  $d/crosstool.config
             sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
             sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
-            grep 'REVISION' $d/crosstool.config || true
+
+            grep 'REVISION\|DEVEL_URL' crosstool.config || true
           done
       - name: "build ct-ng"
         run: |
