@@ -202,9 +202,8 @@ jobs:
     with:
       samples: >-
         [
-          "snps-arc-elf32-win",
-          "snps-arceb-elf32-win",
-          "snps-arc64-elf-win"
+         "snps-arc-archs-native-gnu",  
+         "snps-arc64-snps-native-gnu"
         ]
 
   #       [
