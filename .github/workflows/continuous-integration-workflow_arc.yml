@@ -140,7 +140,7 @@ jobs:
             sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
             sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
 
-            grep 'REVISION\|DEVEL_URL' crosstool.config || true
+            grep 'REVISION\|DEVEL_URL' $d/crosstool.config || true
           done
       - name: "build ct-ng"
         run: |
