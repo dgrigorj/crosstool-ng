@@ -121,6 +121,9 @@ jobs:
         run: |
           for d in $(find ./samples -type d | grep snps-) ; do
             echo "Patching config for sample: $d"
+
+            sed -i -e "/CT_GCC_DEVEL_URL=/s/\".*\"/\"${GCC_REPO_URL}\"/"                                            $d/crosstool.config
+
             sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.LINUX_COMMIT }}\"/"         $d/crosstool.config
             sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GCC_COMMIT }}\"/"             $d/crosstool.config
             sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"   $d/crosstool.config
