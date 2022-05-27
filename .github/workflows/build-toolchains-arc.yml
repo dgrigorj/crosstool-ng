@@ -82,37 +82,37 @@ jobs:
           ct-ng build
 
 
-      - name: create ${{ matrix.sample }}.${{ matrix.host }} tarball
-        if: ${{ matrix.sample == 'x86_64-w64-mingw32' }}
-        run: |
-          tar -C ${{ github.workspace }}/x-tools/${{ matrix.sample }} \
-              -cf ${{ matrix.sample }}.${{ matrix.host }}.tar .
-      - name: upload ${{ matrix.sample }}.${{ matrix.host }} tarball
-        if: ${{ matrix.sample == 'x86_64-w64-mingw32' }}
-        uses: actions/upload-artifact@v2
-        with:
-          name: x86_64-w64-mingw32.${{ matrix.host }}.tar
-          path: |
-            x86_64-w64-mingw32.${{ matrix.host }}.tar
-
-
-      # - name: set mingw32 name to environment variable
-      #   if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+      # - name: create ${{ matrix.sample }}.${{ matrix.host }} tarball
+      #   if: ${{ matrix.sample == 'x86_64-w64-mingw32' }}
       #   run: |
-      #     SAMPLE=${{ matrix.sample }}          
-      #     echo "MINGW32=${SAMPLE#snps-}" >> $GITHUB_ENV
-      # - name: create ${{ env.MINGW32 }}.${{ matrix.host }} tarball
-      #   if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
-      #   run: |
-      #     tar -C ${{ github.workspace }}/x-tools/${{ env.MINGW32 }} \
-      #         -cf ${{ env.MINGW32 }}.${{ matrix.host }}.tar .
-      # - name: upload ${{ env.MINGW32 }}.${{ matrix.host }} tarball
-      #   if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+      #     tar -C ${{ github.workspace }}/x-tools/${{ matrix.sample }} \
+      #         -cf ${{ matrix.sample }}.${{ matrix.host }}.tar .
+      # - name: upload ${{ matrix.sample }}.${{ matrix.host }} tarball
+      #   if: ${{ matrix.sample == 'x86_64-w64-mingw32' }}
       #   uses: actions/upload-artifact@v2
       #   with:
-      #     name: ${{ env.MINGW32 }}.${{ matrix.host }}.tar
+      #     name: x86_64-w64-mingw32.${{ matrix.host }}.tar
       #     path: |
-      #       ${{ env.MINGW32 }}.${{ matrix.host }}.tar
+      #       x86_64-w64-mingw32.${{ matrix.host }}.tar
+
+
+      - name: set mingw32 name to environment variable
+        if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+        run: |
+          SAMPLE=${{ matrix.sample }}
+          echo "MINGW32=${SAMPLE#snps-}" >> $GITHUB_ENV
+      - name: create ${{ env.MINGW32 }}.${{ matrix.host }} tarball
+        if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+        run: |
+          tar -C ${{ github.workspace }}/x-tools/${{ env.MINGW32 }} \
+              -cf ${{ env.MINGW32 }}.${{ matrix.host }}.tar .
+      - name: upload ${{ env.MINGW32 }}.${{ matrix.host }} tarball
+        if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
+        uses: actions/upload-artifact@v2
+        with:
+          name: ${{ env.MINGW32 }}.${{ matrix.host }}.tar
+          path: |
+            ${{ env.MINGW32 }}.${{ matrix.host }}.tar
 
 
       - name: upload log
