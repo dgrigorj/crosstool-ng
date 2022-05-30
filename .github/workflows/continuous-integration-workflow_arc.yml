@@ -202,7 +202,13 @@ jobs:
     with:
       samples: >-
         [
-         "snps-arc-archs-linux-gnu"
+         "snps-arc-arc700-linux-uclibc",
+         "snps-arc32-snps-linux-uclibc",
+         "snps-arc32-snps-linux-gnu",
+         "snps-arc64-snps-linux-gnu",
+         "snps-arc-multilib-elf32",
+         "snps-arceb-multilib-elf32",
+         "snps-arc64-unknown-elf",
         ]
 
   #       [
@@ -226,7 +232,14 @@ jobs:
   #        "snps-arc64-snps-native-gnu",
   #        ]
 
-
+  arc_linux:
+    needs: [ tarballs ]
+    uses: ./.github/workflows/build-toolchains-arc.yml
+    with:
+      samples: >-
+        [
+          "snps-arc-archs-linux-gnu"
+        ]
 
 
   mingw32:
@@ -239,13 +252,27 @@ jobs:
         ]
 
 
-  canadian-cross:
-    needs: [ mingw32, toolchains ]
+  canadian-win:
+    needs: [ mingw32 ]
     uses: ./.github/workflows/build-toolchains-arc.yml
     with:
       samples: >-
         [
           "snps-arc-elf32-win",
-          "snps-arc-archs-native-gnu"
+          "snps-arceb-elf32-win",
+          "snps-arc64-elf-win"
+        ]
+      canadian-cross: true
+
+
+  canadian-native:
+    needs: [ arc_linux ]
+    uses: ./.github/workflows/build-toolchains-arc.yml
+    with:
+      samples: >-
+        [
+          "snps-arc-archs-native-gnu",
+          "snps-arc32-snps-native-gnu",
+          "snps-arc64-snps-native-gnu"
         ]
       canadian-cross: true
