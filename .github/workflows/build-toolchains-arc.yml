@@ -58,12 +58,12 @@ jobs:
 
 
       - name: download arc-snps-linux-gnu.${{ matrix.host }} tarball
-        if: inputs.canadian-cross && ${{ matrix.sample == 'snps-arc-archs-native-gnu' }}
+        if: inputs.canadian-cross && ( matrix.sample == 'snps-arc-archs-native-gnu' )
         uses: actions/download-artifact@v2
         with:
           name: arc-snps-linux-gnu.${{ matrix.host }}.tar
       - name: install arc-snps-linux-gnu.${{ matrix.host }} toolchain
-        if: inputs.canadian-cross && ${{ matrix.sample == 'snps-arc-archs-native-gnu' }}
+        if: inputs.canadian-cross && ( matrix.sample == 'snps-arc-archs-native-gnu' )
         run: |
           mkdir -p ${{ github.workspace }}/arc-snps-linux-gnu
           tar -C ${{ github.workspace }}/arc-snps-linux-gnu \
