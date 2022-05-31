@@ -66,34 +66,6 @@ jobs:
               -xf ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.tar
           echo "${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}/bin" >> $GITHUB_PATH
 
-      # - name: download x86_64-w64-mingw32.${{ matrix.host }} tarball
-      #   if: inputs.canadian-cross && contains(matrix.sample, 'win')
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: x86_64-w64-mingw32.${{ matrix.host }}.tar
-      # - name: install x86_64-w64-mingw32.${{ matrix.host }} toolchain
-      #   if: inputs.canadian-cross && contains(matrix.sample, 'win')
-      #   run: |
-      #     mkdir -p ${{ github.workspace }}/x86_64-w64-mingw32
-      #     tar -C ${{ github.workspace }}/x86_64-w64-mingw32 \
-      #         -xf x86_64-w64-mingw32.${{ matrix.host }}.tar
-      #     echo "${{ github.workspace }}/x86_64-w64-mingw32/bin" >> $GITHUB_PATH
-
-
-      # - name: download arc-snps-linux-gnu.${{ matrix.host }} tarball
-      #   if: inputs.canadian-cross && contains(matrix.sample, 'native')
-      #   uses: actions/download-artifact@v2
-      #   with:
-      #     name: arc-snps-linux-gnu.${{ matrix.host }}.tar
-      # - name: install arc-snps-linux-gnu.${{ matrix.host }} toolchain
-      #   if: inputs.canadian-cross && contains(matrix.sample, 'native')
-      #   run: |
-      #     mkdir -p ${{ github.workspace }}/arc-snps-linux-gnu
-      #     tar -C ${{ github.workspace }}/arc-snps-linux-gnu \
-      #         -xf arc-snps-linux-gnu.${{ matrix.host }}.tar
-      #     echo "${{ github.workspace }}/arc-snps-linux-gnu/bin" >> $GITHUB_PATH
-
-
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
           mkdir -p src
@@ -105,7 +77,8 @@ jobs:
 
 
       - name: set upload tarball name to environment variable
-        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
+        #if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
+        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-arc64-elf-win') || (matrix.sample == 'snps-arc64-snps-linux-gnu')
         run: |
           if [[ ${{ matrix.sample }} == 'snps-x86_64-w64-mingw32' ]]; then
             echo "UPLOAD_PREFIX=x86_64-w64-mingw32" >> $GITHUB_ENV
@@ -115,49 +88,19 @@ jobs:
           #  echo "UPLOAD_PREFIX=x86_64-apple-darwin14" >> $GITHUB_ENV
           fi
       - name: create ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }} tarball
-        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
+        #if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
+        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-arc64-elf-win') || (matrix.sample == 'snps-arc64-snps-linux-gnu')
         run: |
           tar -C ${{ github.workspace }}/x-tools/${{ env.UPLOAD_PREFIX }} \
               -cf ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }}.tar .
       - name: upload ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }} tarball
-        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
+        #if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
+        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-arc64-elf-win') || (matrix.sample == 'snps-arc64-snps-linux-gnu')        
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }}.tar
           path: |
             ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }}.tar
-
-
-      # - name: set mingw32 name to environment variable
-      #   if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
-      #   run: |
-      #     SAMPLE=${{ matrix.sample }}
-      #     echo "MINGW32=${SAMPLE#snps-}" >> $GITHUB_ENV
-      # - name: create ${{ env.MINGW32 }}.${{ matrix.host }} tarball
-      #   if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
-      #   run: |
-      #     tar -C ${{ github.workspace }}/x-tools/${{ env.MINGW32 }} \
-      #         -cf ${{ env.MINGW32 }}.${{ matrix.host }}.tar .
-      # - name: upload ${{ env.MINGW32 }}.${{ matrix.host }} tarball
-      #   if: ${{ (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-i686-w64-mingw32') }}
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: ${{ env.MINGW32 }}.${{ matrix.host }}.tar
-      #     path: |
-      #       ${{ env.MINGW32 }}.${{ matrix.host }}.tar
-
-      # - name: create arc-snps-linux-gnu.${{ matrix.host }} tarball
-      #   if: (matrix.sample == 'snps-arc-archs-linux-gnu')
-      #   run: |
-      #     tar -C ${{ github.workspace }}/x-tools/arc-snps-linux-gnu \
-      #         -cf arc-snps-linux-gnu.${{ matrix.host }}.tar .
-      # - name: upload arc-snps-linux-gnu.${{ matrix.host }} tarball
-      #   if: ${{ matrix.sample == 'snps-arc-archs-linux-gnu' }}
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: arc-snps-linux-gnu.${{ matrix.host }}.tar
-      #     path: |
-      #       arc-snps-linux-gnu.${{ matrix.host }}.tar
 
       - name: upload log
         uses: actions/upload-artifact@v2
