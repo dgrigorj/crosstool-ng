@@ -8,7 +8,7 @@ on:
         required: true
         type: string
       canadian-cross:
-        description: Build Canadian Cross toolchain(x86_64-w64-mingw32)
+        description: Build Canadian Cross toolchain
         default: false
         required: false
         type: boolean
@@ -51,7 +51,7 @@ jobs:
           elif [[ ${{ matrix.sample }} == *"native"* ]]; then
             echo "DOWNLOAD_PREFIX=arc-snps-linux-gnu" >> $GITHUB_ENV
           elif [[ ${{ matrix.sample }} == *"macos"* ]]; then
-            echo "DOWNLOAD_PREFIX=x86_64-apple-darwin14" >> $GITHUB_ENV
+            echo "DOWNLOAD_PREFIX=x86_64-apple-darwin15" >> $GITHUB_ENV
           fi
       - name: download ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }} tarball
         if: inputs.canadian-cross
@@ -66,6 +66,10 @@ jobs:
               -xf ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.tar
           echo "${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}/bin" >> $GITHUB_PATH
 
+          #osxcross specifics
+          rm -f ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.tar
+          echo "${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}/binutils/bin" >> $GITHUB_PATH
+
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
           mkdir -p src
@@ -77,8 +81,7 @@ jobs:
 
 
       - name: set upload tarball name to environment variable
-        #if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
-        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-arc64-elf-win') || (matrix.sample == 'snps-arc64-snps-linux-gnu')
+        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu')
         run: |
           if [[ ${{ matrix.sample }} == 'snps-x86_64-w64-mingw32' ]]; then
             echo "UPLOAD_PREFIX=x86_64-w64-mingw32" >> $GITHUB_ENV
@@ -88,14 +91,12 @@ jobs:
           #  echo "UPLOAD_PREFIX=x86_64-apple-darwin14" >> $GITHUB_ENV
           fi
       - name: create ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }} tarball
-        #if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
-        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-arc64-elf-win') || (matrix.sample == 'snps-arc64-snps-linux-gnu')
+        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu')
         run: |
           tar -C ${{ github.workspace }}/x-tools/${{ env.UPLOAD_PREFIX }} \
               -cf ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }}.tar .
       - name: upload ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }} tarball
-        #if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-x86_64-apple-darwin14')
-        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu') || (matrix.sample == 'snps-arc64-elf-win') || (matrix.sample == 'snps-arc64-snps-linux-gnu')        
+        if: (matrix.sample == 'snps-x86_64-w64-mingw32') || (matrix.sample == 'snps-arc-archs-linux-gnu')
         uses: actions/upload-artifact@v2
         with:
           name: ${{ env.UPLOAD_PREFIX }}.${{ matrix.host }}.tar
