@@ -90,12 +90,12 @@ jobs:
             #wget -q -P ./tarballs/ https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.11.sdk.tar.xz 
             wget -q -P ./tarballs/ https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
             UNATTENDED=1 ./build.sh
-            ./build_gcc.sh
-            ./build_binutils.sh
+            GCC_VERSION=11.2.0 ./build_gcc.sh
+            BINUTILS_VERSION=2.36 GDB_VERSION=12.1 ./build_binutils.sh
           popd
           echo "${{ github.workspace }}/osxcross/target/bin" >> $GITHUB_PATH
           echo "${{ github.workspace }}/osxcross/target/binutils/bin" >> $GITHUB_PATH
-
+          sudo apt remove libssl-dev lzma-dev libxml2-dev zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
 
 
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
