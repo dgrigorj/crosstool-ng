@@ -50,8 +50,8 @@ jobs:
             echo "DOWNLOAD_PREFIX=x86_64-w64-mingw32" >> $GITHUB_ENV
           elif [[ ${{ matrix.sample }} == *"native"* ]]; then
             echo "DOWNLOAD_PREFIX=arc-snps-linux-gnu" >> $GITHUB_ENV
-          elif [[ ${{ matrix.sample }} == *"macos"* ]]; then
-            echo "DOWNLOAD_PREFIX=x86_64-apple-darwin15" >> $GITHUB_ENV
+          #elif [[ ${{ matrix.sample }} == *"macos"* ]]; then
+          #  echo "DOWNLOAD_PREFIX=x86_64-apple-darwin15" >> $GITHUB_ENV
           fi
       - name: download ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }} tarball
         if: inputs.canadian-cross
@@ -66,9 +66,36 @@ jobs:
               -xf ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.tar
           echo "${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}/bin" >> $GITHUB_PATH
 
-          #osxcross specifics
-          rm -f ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.tar
-          echo "${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}/binutils/bin" >> $GITHUB_PATH
+
+
+
+
+
+
+
+
+      - name: Get osxcross sources
+        if: (matrix.sample == 'snps-arc-elf32-macos')
+        uses: actions/checkout@v2
+        with:
+          repository: tpoechtrager/osxcross
+          path: './osxcross'
+
+      - name: Build OSXcross toolchain
+        if: (matrix.sample == 'snps-arc-elf32-macos')
+        run: |
+          sudo apt-get install patch clang cmake libssl-dev lzma-dev libxml2-dev gcc g++ zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+          pushd osxcross
+            #wget -q -P ./tarballs/ https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX10.11.sdk.tar.xz 
+            wget -q -P ./tarballs/ https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
+            UNATTENDED=1 ./build.sh
+            ./build_gcc.sh
+            ./build_binutils.sh
+          popd
+          echo "${{ github.workspace }}/osxcross/target/bin" >> $GITHUB_PATH
+          echo "${{ github.workspace }}/osxcross/target/binutils/bin" >> $GITHUB_PATH
+
+
 
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
