@@ -95,7 +95,7 @@ jobs:
           echo "${{ github.workspace }}/osxcross/target/bin" >> $GITHUB_PATH
           echo "${{ github.workspace }}/osxcross/target/binutils/bin" >> $GITHUB_PATH
 
-          clang -Wl,-t -lgmp 2>/dev/null
+          #clang -Wl,-t -lgmp 2>/dev/null
 
       - name: build ${{ matrix.sample }} for ${{ matrix.host }}
         run: |
