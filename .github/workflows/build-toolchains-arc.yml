@@ -87,6 +87,7 @@ jobs:
             wget -q -P ./tarballs/ https://mpfr.loria.fr/mpfr-current/$mpfr.tar.xz
             wget -q -P ./tarballs/ ftp://gcc.gnu.org/pub/gcc/infrastructure/$mpc.tar.gz
 
+            mkdir -p build
             tar xf tarballs/$gmp.tar.xz  -C build/
             tar xf tarballs/$mpfr.tar.xz  -C build/
             tar xf tarballs/$mpc.tar.gz -C build/
