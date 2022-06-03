@@ -73,9 +73,44 @@ jobs:
       - name: Build OSXcross toolchain
         if: contains(matrix.sample, 'macos')
         run: |
-          sudo apt-get install clang cmake libssl-dev lzma-dev libxml2-dev zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+          #sudo apt-get install clang cmake libssl-dev lzma-dev libxml2-dev zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
+          sudo apt-get install clang cmake libssl-dev libxml2-dev
           pushd osxcross
+
+            OSXCROSS_DIR=$PWD
+            gmp='gmp-6.2.1'
+            mpfr='mpfr-4.1.0'
+            mpc='mpc-1.2.1'
+
             wget -q -P ./tarballs/ https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
+            wget -q -P ./tarballs/ https://gmplib.org/download/gmp/$gmp.tar.xz
+            wget -q -P ./tarballs/ https://mpfr.loria.fr/mpfr-current/$mpfr.tar.xz
+            wget -q -P ./tarballs/ ftp://gcc.gnu.org/pub/gcc/infrastructure/$mpc.tar.gz
+
+            tar xf tarballs/$gmp.tar.xz  -C build/
+            tar xf tarballs/$mpfr.tar.xz  -C build/
+            tar xf tarballs/$mpc.tar.gz -C build/
+
+            sed -i "/--disable-nls/a \ \ --with-mpc=${OSXCROSS_DIR}/build/tmp \\\\" build_gcc.sh build_binutils.sh
+            sed -i "/--disable-nls/a \ \ --with-mpfr=${OSXCROSS_DIR}/build/tmp \\\\" build_gcc.sh build_binutils.sh
+            sed -i "/--disable-nls/a \ \ --with-libgmp-prefix=${OSXCROSS_DIR}/build/tmp \\\\" build_gcc.sh build_binutils.sh
+            sed -i "/--disable-nls/a \ \ --with-gmp=${OSXCROSS_DIR}/build/tmp \\\\" build_gcc.sh build_binutils.sh
+
+            pushd $OSXCROSS_DIR/build/${gmp}
+              ./configure --disable-shared --enable-static --prefix=${OSXCROSS_DIR}/build/tmp
+              make && make check && make install
+            popd
+
+            pushd $OSXCROSS_DIR/build/${mpfr}
+              ./configure --disable-shared --enable-static --prefix=${OSXCROSS_DIR}/build/tmp --with-gmp=${OSXCROSS_DIR}/build/tmp
+              make && make check && make install
+            popd
+
+            pushd $OSXCROSS_DIR/build/${mpc}
+              ./configure --disable-shared --enable-static --prefix=${OSXCROSS_DIR}/build/tmp --with-gmp=${OSXCROSS_DIR}/build/tmp --with-mpfr=${OSXCROSS_DIR}/build/tmp
+              make && make check && make install
+            popd
+
             UNATTENDED=1 ./build.sh
             GCC_VERSION=11.2.0 ./build_gcc.sh
             BINUTILS_VERSION=2.36 GDB_VERSION=12.1 ./build_binutils.sh
