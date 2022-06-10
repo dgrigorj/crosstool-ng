@@ -45,11 +45,14 @@ jobs:
       - name: select download name for cross-build tarball
         if: inputs.canadian-cross
         run: |
-          if [[ ${{ matrix.sample }} == *"win"* ]]; then
-            echo "DOWNLOAD_PREFIX=x86_64-w64-mingw32" >> $GITHUB_ENV
-          elif [[ ${{ matrix.sample }} == *"native"* ]]; then
-            echo "DOWNLOAD_PREFIX=arc-archs-linux-gnu" >> $GITHUB_ENV
-          fi
+          case ${{ matrix.sample }} in
+              *"win"* )
+                echo "DOWNLOAD_PREFIX=x86_64-w64-mingw32" >> $GITHUB_ENV ;;
+              *"arc64"*"native"* )
+                echo "DOWNLOAD_PREFIX=arc64-snps-linux-gnu" >> $GITHUB_ENV ;;
+              *"native"* )
+                echo "DOWNLOAD_PREFIX=arc32-snps-linux-gnu" >> $GITHUB_ENV ;;
+          esac
       - name: download ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }} tarball
         if: inputs.canadian-cross
         uses: actions/download-artifact@v2
@@ -69,7 +72,6 @@ jobs:
         with:
           repository: tpoechtrager/osxcross
           path: './osxcross'
-
       - name: Build OSXcross toolchain
         if: contains(matrix.sample, 'macos')
         run: |
@@ -93,18 +95,22 @@ jobs:
 
       - name: set tarball prefixes to environment variables
         run: |
-          if [[ ${{ matrix.sample }} == *"arceb"* ]]; then
-            ARCH="arceb"
-          elif [[ ${{ matrix.sample }} == *"arc"* ]]; then
-            ARCH="arc"
-          fi
-          if [[ ${{ matrix.sample }} == *"uclibc"* ]]; then
-            TOOLCHAIN_FOLDER="${ARCH}-snps-linux-uclibc"
-          elif [[ ${{ matrix.sample }} == *"gnu"* ]]; then
-            TOOLCHAIN_FOLDER="${ARCH}-snps-linux-gnu"
-          elif [[ ${{ matrix.sample }} == *"elf"* ]]; then
-            TOOLCHAIN_FOLDER="${ARCH}-snps-elf"
-          fi
+          case ${{ matrix.sample }} in
+              *"arc64"* )
+                  ARCH="arc64" ;;
+              *"arceb"* )
+                  ARCH="arceb" ;;
+              * )
+                  ARCH="arc" ;;
+          esac
+          case ${{ matrix.sample }} in
+              *"uclibc"* )
+                  TOOLCHAIN_FOLDER="${ARCH}-snps-linux-uclibc" ;;
+              *"gnu"* )
+                  TOOLCHAIN_FOLDER="${ARCH}-snps-linux-gnu" ;;
+              *"elf"* )
+                  TOOLCHAIN_FOLDER="${ARCH}-snps-elf" ;;
+          esac
           if [[ ${{ matrix.sample }} == 'snps-x86_64-w64-mingw32' ]]; then
             echo "TOOLCHAIN_FOLDER=x86_64-w64-mingw32" >> $GITHUB_ENV
           else
@@ -115,13 +121,16 @@ jobs:
 
       - name: create ${{ env.TARBALL_PREFIX }}.${{ matrix.host }} tarball
         run: |
-          if [[ ${{ matrix.sample }} == *"win"* ]]; then
-            TARGET_DIR="HOST-x86_64-w64-mingw32/${TOOLCHAIN_FOLDER}"
-          elif [[ ${{ matrix.sample }} == *"native"* ]]; then
-            TARGET_DIR="HOST-arc-snps-linux-gnu/${TOOLCHAIN_FOLDER}"
-          else
-            TARGET_DIR="${TOOLCHAIN_FOLDER}"
-          fi
+          case ${{ matrix.sample }} in
+              *"win"* )
+                TARGET_DIR="HOST-x86_64-w64-mingw32/${TOOLCHAIN_FOLDER}" ;;
+              *"arc64"*"native"* )
+                TARGET_DIR="HOST-arc64-snps-linux-gnu/${TOOLCHAIN_FOLDER}" ;;
+              *"native"* )
+                TARGET_DIR="HOST-arc-snps-linux-gnu/${TOOLCHAIN_FOLDER}" ;;
+              *)
+                TARGET_DIR="${TOOLCHAIN_FOLDER}" ;;
+          esac
           tar -C ${{ github.workspace }}/x-tools/${TARGET_DIR} \
               -czf ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.tar.gz .
 
@@ -131,7 +140,6 @@ jobs:
           name: ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.tar.gz
           path: |
             ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.tar.gz
-
       - name: upload log
         uses: actions/upload-artifact@v2
         with:
