@@ -77,6 +77,7 @@ jobs:
         run: |
           sudo apt-get install clang cmake libssl-dev lzma-dev libxml2-dev zlib1g-dev libmpc-dev libmpfr-dev libgmp-dev
           pushd osxcross
+            wget -q -P ./tarballs/ https://github.com/phracker/MacOSX-SDKs/releases/download/11.3/MacOSX11.3.sdk.tar.xz
             UNATTENDED=1 ./build.sh
             GCC_VERSION=11.2.0 ./build_gcc.sh
             BINUTILS_VERSION=2.37 GDB_VERSION=10.2 ./build_binutils.sh
