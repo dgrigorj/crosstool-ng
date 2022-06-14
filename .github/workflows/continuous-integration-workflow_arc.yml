@@ -202,7 +202,8 @@ jobs:
     with:
       samples: >-
         [
-          "snps-arc-elf32-macos"
+          "snps-arc-elf32-macos",
+          "snps-arc64-elf-macos"
         ]
 
   #       [
