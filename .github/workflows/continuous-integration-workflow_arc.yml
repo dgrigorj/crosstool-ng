@@ -66,15 +66,15 @@ jobs:
       UCLIBC_COMMIT:    ${{ steps.variables.outputs.UCLIBC_COMMIT }}
     steps:
 
-      - name: "clone"
+      - name: "Clone Repo"
         uses: actions/checkout@v2
 
-      - name: Set Environment Variables
+      - name: Get ARC Toolchain Variables
         uses: ./.github/actions/setvars
         with:
           varFilePath: ./.github/variables/arc_toolchains.env
 
-      - name: Set github parameters
+      - name: Determine git parameters
         id: variables
         run: |
           echo "Setting Git variables"
@@ -95,7 +95,6 @@ jobs:
               COMMIT=${TOOL}_COMMIT
 
               printf "Using ${TOOL} from:\n\trepo: ${!REPO_URL}\n"
-
               if [[ -n ${!BRANCH} ]]; then
                   # disaptch branch name
                   COMMIT="$(git ls-remote ${!REPO_URL} ${!BRANCH}  | awk '{print $1}')"
@@ -109,17 +108,11 @@ jobs:
                   COMMIT=${!COMMIT}
                   printf "\tcommit: $COMMIT\n"
               fi
-
-              echo "::set-output name=${TOOL}_COMMIT::$COMMIT"
+              #echo "::set-output name=${TOOL}_COMMIT::$COMMIT"
+              echo "${TOOL}_COMMIT=$COMMIT" >> $GITHUB_ENV
           done
 
-          # #manual run parameters
-          # LINUX_INPUT=${{ github.event.inputs.linux }}
-          # GCC_INPUT=${{ github.event.inputs.gcc }}
-          # BINUTILS_INPUT=${{ github.event.inputs.binutils }}
-          # NEWLIB_INPUT=${{ github.event.inputs.newlib }}
-          # GLIBC_INPUT=${{ github.event.inputs.glibc }}
-          # UCLIBC_INPUT=${{ github.event.inputs.uclibc }}
+
 
           # #triggered parameters
           # LINUX_BRANCH=${LINUX_INPUT:-"$LINUX_BRANCH_DEFAULT"}
@@ -151,17 +144,14 @@ jobs:
           # echo "::set-output name=UCLIBC_COMMIT::$UCLIBC_COMMIT"
 
 
-  crosstool:
-    needs: variables
-    runs-on: ubuntu-latest
-    steps:
-      - name: "clone"
-        uses: actions/checkout@v2
-      - name: "prereq Linux"
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          sudo apt-get install -y gperf help2man libtool-bin
-      - name: Update components Git revisions
+  # crosstool:
+  #   needs: variables
+  #   runs-on: ubuntu-latest
+  #   steps:
+      # - name: "clone"
+      #   uses: actions/checkout@v2
+
+      - name: Update configuration files
         run: |
           for d in $(find ./samples -type d | grep snps-) ; do
             echo "Patching config for sample: $d"
@@ -175,20 +165,31 @@ jobs:
             sed -i -e "/CT_GLIBC_DEVEL_URL=/s/\".*\"/\"${GLIBC_REPO_URL//\//\\/}.git\"/g"                           $d/crosstool.config
             sed -i -e "/CT_UCLIBC_NG_DEVEL_URL=/s/\".*\"/\"${UCLIBC_REPO_URL//\//\\/}.git\"/g"                      $d/crosstool.config
 
-            sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.LINUX_COMMIT }}\"/"         $d/crosstool.config
-            sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GCC_COMMIT }}\"/"             $d/crosstool.config
-            sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"   $d/crosstool.config
-            sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"        $d/crosstool.config
-            sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"       $d/crosstool.config
-            sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"  $d/crosstool.config
-            sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
-            sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
+            # sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.LINUX_COMMIT }}\"/"         $d/crosstool.config
+            # sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GCC_COMMIT }}\"/"             $d/crosstool.config
+            # sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"   $d/crosstool.config
+            # sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.BINUTILS_COMMIT }}\"/"        $d/crosstool.config
+            # sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"       $d/crosstool.config
+            # sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.NEWLIB_COMMIT }}\"/"  $d/crosstool.config
+            # sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
+            # sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
+
+            # sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${LINUX_COMMIT}\"/"         $d/crosstool.config
+            # sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${GCC_COMMIT}\"/"             $d/crosstool.config
+            # sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${BINUTILS_COMMIT}\"/"   $d/crosstool.config
+            # sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${BINUTILS_COMMIT}\"/"        $d/crosstool.config
+            # sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${NEWLIB_COMMIT}\"/"       $d/crosstool.config
+            # sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${NEWLIB_COMMIT}\"/"  $d/crosstool.config
+            # sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${GLIBC_COMMIT}\"/"         $d/crosstool.config
+            # sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${UCLIBC_COMMIT}\"/"    $d/crosstool.config
+
 
             grep 'REVISION\|DEVEL_URL' $d/crosstool.config || true
             echo "-----"
           done
       - name: "build ct-ng"
         run: |
+          sudo apt-get install -y gperf help2man libtool-bin
           ./bootstrap
           ./configure --prefix=$PWD/.local/
           make
