@@ -155,8 +155,8 @@ jobs:
     needs: variables
     runs-on: ubuntu-latest
     steps:
-      # - name: "clone"
-      #   uses: actions/checkout@v2
+      - name: "clone"
+        uses: actions/checkout@v2
       - name: "prereq Linux"
         if: ${{ runner.os == 'Linux' }}
         run: |
