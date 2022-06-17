@@ -174,14 +174,14 @@ jobs:
             # sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.GLIBC_COMMIT }}\"/"         $d/crosstool.config
             # sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${{ needs.variables.outputs.UCLIBC_COMMIT }}\"/"    $d/crosstool.config
 
-            # sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${LINUX_COMMIT}\"/"         $d/crosstool.config
-            # sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${GCC_COMMIT}\"/"             $d/crosstool.config
-            # sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${BINUTILS_COMMIT}\"/"   $d/crosstool.config
-            # sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${BINUTILS_COMMIT}\"/"        $d/crosstool.config
-            # sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${NEWLIB_COMMIT}\"/"       $d/crosstool.config
-            # sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${NEWLIB_COMMIT}\"/"  $d/crosstool.config
-            # sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${GLIBC_COMMIT}\"/"         $d/crosstool.config
-            # sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${UCLIBC_COMMIT}\"/"    $d/crosstool.config
+            sed -i -e "/CT_LINUX_DEVEL_REVISION=/s/\".*\"/\"${LINUX_COMMIT}\"/"         $d/crosstool.config
+            sed -i -e "/CT_GCC_DEVEL_REVISION=/s/\".*\"/\"${GCC_COMMIT}\"/"             $d/crosstool.config
+            sed -i -e "/CT_BINUTILS_DEVEL_REVISION=/s/\".*\"/\"${BINUTILS_COMMIT}\"/"   $d/crosstool.config
+            sed -i -e "/CT_GDB_DEVEL_REVISION=/s/\".*\"/\"${BINUTILS_COMMIT}\"/"        $d/crosstool.config
+            sed -i -e "/CT_NEWLIB_DEVEL_REVISION=/s/\".*\"/\"${NEWLIB_COMMIT}\"/"       $d/crosstool.config
+            sed -i -e "/CT_NEWLIB_NANO_DEVEL_REVISION=/s/\".*\"/\"${NEWLIB_COMMIT}\"/"  $d/crosstool.config
+            sed -i -e "/CT_GLIBC_DEVEL_REVISION=/s/\".*\"/\"${GLIBC_COMMIT}\"/"         $d/crosstool.config
+            sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${UCLIBC_COMMIT}\"/"    $d/crosstool.config
 
 
             grep 'REVISION\|DEVEL_URL' $d/crosstool.config || true
