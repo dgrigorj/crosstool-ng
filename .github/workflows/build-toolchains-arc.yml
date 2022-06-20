@@ -25,7 +25,7 @@ jobs:
       - name: download ct-ng
         uses: actions/download-artifact@v2
         with:
-          name: crosstool.${{ matrix.host }}
+          name: crosstool.ubuntu
       - name: extract ct-ng
         run: |
           tar -xf ct-ng.tar
