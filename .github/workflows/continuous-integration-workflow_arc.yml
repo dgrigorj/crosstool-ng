@@ -70,7 +70,7 @@ jobs:
 
               printf "Using ${TOOL} from:\n\trepo: ${!REPO_URL}\n"
               if [[ -n ${!BRANCH} ]]; then
-                  # disaptch branch name
+                  # dispatch branch name
                   COMMIT="$(git ls-remote ${!REPO_URL} ${!BRANCH}  | awk '{print $1}')"
                   printf "\tbranch: ${!BRANCH}\n\tcommit: $COMMIT\n"
               elif [[ -z ${!COMMIT} ]]; then
@@ -122,20 +122,17 @@ jobs:
       - name: "upload ct-ng"
         uses: actions/upload-artifact@v2
         with:
-          name: crosstool.ubuntu-latest
+          name: crosstool.ubuntu
           path: ct-ng.tar
 
   tarballs:
     needs: [ crosstool ]
-    runs-on: ${{ matrix.host }}
-    strategy:
-      matrix:
-        host: [ "ubuntu-latest" ]
+    runs-on: ubuntu-latest
     steps:
       - name: "download ct-ng"
         uses: actions/download-artifact@v2
         with:
-          name: crosstool.${{ matrix.host }}
+          name: crosstool.ubuntu
       - name: "extract ct-ng"
         run: |
           tar -xf ct-ng.tar
