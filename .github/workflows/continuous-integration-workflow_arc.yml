@@ -39,7 +39,10 @@ on:
 
 jobs:
   crosstool:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.host }}
+    strategy:
+      matrix:
+        host: [ "ubuntu-18.04" ]
     steps:
 
       - name: "Clone Repo"
@@ -122,17 +125,17 @@ jobs:
       - name: "upload ct-ng"
         uses: actions/upload-artifact@v2
         with:
-          name: crosstool.ubuntu
+          name: crosstool.${{ matrix.host }}
           path: ct-ng.tar
 
   tarballs:
     needs: [ crosstool ]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - name: "download ct-ng"
         uses: actions/download-artifact@v2
         with:
-          name: crosstool.ubuntu
+          name: crosstool.ubuntu-18.04
       - name: "extract ct-ng"
         run: |
           tar -xf ct-ng.tar
@@ -144,6 +147,8 @@ jobs:
       - name: "ct-ng source"
         run: |
           mkdir -p src
+          # we loop through limited number of configurations to get all required source packages
+          # tarball created will be reused to build toolchains for all ARC configurations
           for sample in snps-arc-archs-linux-gnu snps-arc-archs-linux-uclibc\
                 snps-arc-multilib-elf32 ; do \
                 ct-ng $sample; \

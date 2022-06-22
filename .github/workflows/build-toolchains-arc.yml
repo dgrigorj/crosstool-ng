@@ -20,12 +20,12 @@ jobs:
       fail-fast: false
       matrix:
         sample: ${{ fromJSON(inputs.samples) }}
-        host: [ "ubuntu-latest" ]
+        host: [ "ubuntu-18.04" ]
     steps:
       - name: download ct-ng
         uses: actions/download-artifact@v2
         with:
-          name: crosstool.ubuntu
+          name: crosstool.${{ matrix.host }}
       - name: extract ct-ng
         run: |
           tar -xf ct-ng.tar
