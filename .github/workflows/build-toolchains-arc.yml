@@ -12,6 +12,11 @@ on:
         default: false
         required: false
         type: boolean
+      release-suffix:
+        description: Release suffix string
+        required: true
+        type: string
+
 
 jobs:
   build:
@@ -53,17 +58,17 @@ jobs:
               *"native"* )
                 echo "DOWNLOAD_PREFIX=arc32-snps-linux-gnu" >> $GITHUB_ENV ;;
           esac
-      - name: download ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }} tarball
+      - name: download ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }} tarball
         if: inputs.canadian-cross
         uses: actions/download-artifact@v2
         with:
-          name: ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }}.tar.gz
-      - name: install ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }} toolchain
+          name: ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }}.tar.gz
+      - name: install ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }} toolchain
         if: inputs.canadian-cross
         run: |
           mkdir -p ${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}
           tar -C ${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }} \
-              -xzf ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }}.tar.gz
+              -xzf ${{ env.DOWNLOAD_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }}.tar.gz
           echo "${{ github.workspace }}/${{ env.DOWNLOAD_PREFIX }}/bin" >> $GITHUB_PATH
 
       - name: Get osxcross sources
@@ -119,7 +124,7 @@ jobs:
           sample=${{ matrix.sample }}
           echo "TARBALL_PREFIX=${sample#*-}" >> $GITHUB_ENV
 
-      - name: create ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }} tarball
+      - name: create ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }} tarball
         run: |
           case ${{ matrix.sample }} in
               *"win"* )
@@ -132,18 +137,18 @@ jobs:
                 TARGET_DIR="${TOOLCHAIN_FOLDER}" ;;
           esac
           tar -C ${{ github.workspace }}/x-tools/${TARGET_DIR} \
-              -czf ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }}.tar.gz .
+              -czf ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }}.tar.gz .
 
-      - name: upload ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }} tarball
+      - name: upload ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }} tarball
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }}.tar.gz
+          name: ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }}.tar.gz
           path: |
-            ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.build-${{ github.run_number }}.tar.gz
+            ${{ env.TARBALL_PREFIX }}.${{ matrix.host }}.${{ inputs.release-suffix }}.tar.gz
       - name: upload log
         uses: actions/upload-artifact@v2
         with:
-          name: ${{ matrix.sample }}.${{ matrix.host }}.build-${{ github.run_number }}.log
+          name: ${{ matrix.sample }}.${{ matrix.host }}.${{ inputs.release-suffix }}.log
           path: |
             build.log
             .config
