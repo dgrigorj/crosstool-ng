@@ -133,7 +133,7 @@ jobs:
               elif [[ $target_toolchain == *mingw* ]]; then
                   tools_version='x86_64 MinGW-W64 toolchain'
               fi
-              tools_version+=" - build ${{ github.run_number }}"
+              tools_version+=" ${{ steps.build_suffix.outputs.build_suffix }}"
               echo "$tools_version"
           }
 
@@ -179,43 +179,43 @@ jobs:
           name: crosstool.${{ matrix.host }}
           path: ct-ng.tar
 
-  tarballs:
-    needs: [ crosstool ]
-    runs-on: ubuntu-18.04
-    steps:
-      - name: "download ct-ng"
-        uses: actions/download-artifact@v2
-        with:
-          name: crosstool.ubuntu-18.04
-      - name: "extract ct-ng"
-        run: |
-          tar -xf ct-ng.tar
-      - name: "prereq Linux"
-        if: ${{ runner.os == 'Linux' }}
-        run: |
-          sudo apt-get install -y gperf help2man libtool-bin
-          echo "$GITHUB_WORKSPACE/.local/bin" >> $GITHUB_PATH
-      - name: "ct-ng source"
-        run: |
-          mkdir -p src
-          # we loop through limited number of configurations to get all required source packages
-          # tarball created will be reused to build toolchains for all ARC configurations
-          for sample in snps-arc-archs-linux-gnu snps-arc-archs-linux-uclibc\
-                snps-arc-multilib-elf32 ; do \
-                ct-ng $sample; \
-                sed -i -e '/CT_LOG_PROGRESS_BAR/s/y$/n/' .config; \
-                sed -i -e '/CT_LOCAL_TARBALLS_DIR/s/HOME/CT_TOP_DIR/' .config; \
-                sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config; \
-                ct-ng olddefconfig; \
-                ct-ng source; \
-          done
-          tar -cvf src.tar src
-      - name: "upload sources"
-        uses: actions/upload-artifact@v2
-        with:
-          name: src.tar
-          path: src.tar
-          retention-days: 2
+  # tarballs:
+  #   needs: [ crosstool ]
+  #   runs-on: ubuntu-18.04
+  #   steps:
+  #     - name: "download ct-ng"
+  #       uses: actions/download-artifact@v2
+  #       with:
+  #         name: crosstool.ubuntu-18.04
+  #     - name: "extract ct-ng"
+  #       run: |
+  #         tar -xf ct-ng.tar
+  #     - name: "prereq Linux"
+  #       if: ${{ runner.os == 'Linux' }}
+  #       run: |
+  #         sudo apt-get install -y gperf help2man libtool-bin
+  #         echo "$GITHUB_WORKSPACE/.local/bin" >> $GITHUB_PATH
+  #     - name: "ct-ng source"
+  #       run: |
+  #         mkdir -p src
+  #         # we loop through limited number of configurations to get all required source packages
+  #         # tarball created will be reused to build toolchains for all ARC configurations
+  #         for sample in snps-arc-archs-linux-gnu snps-arc-archs-linux-uclibc\
+  #               snps-arc-multilib-elf32 ; do \
+  #               ct-ng $sample; \
+  #               sed -i -e '/CT_LOG_PROGRESS_BAR/s/y$/n/' .config; \
+  #               sed -i -e '/CT_LOCAL_TARBALLS_DIR/s/HOME/CT_TOP_DIR/' .config; \
+  #               sed -i -e '/CT_PREFIX_DIR/s/HOME/CT_TOP_DIR/' .config; \
+  #               ct-ng olddefconfig; \
+  #               ct-ng source; \
+  #         done
+  #         tar -cvf src.tar src
+  #     - name: "upload sources"
+  #       uses: actions/upload-artifact@v2
+  #       with:
+  #         name: src.tar
+  #         path: src.tar
+  #         retention-days: 2
 
   # toolchains:
   #   needs: [ tarballs, crosstool ]
