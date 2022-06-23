@@ -104,6 +104,39 @@ jobs:
 
       - name: Update configuration files
         run: |
+
+          get_tools_version_string() {
+              local target_toolchain="$1"
+              local tools_version
+              if [[ $target_toolchain == *arc64*elf* ]]; then
+                  tools_version='ARCv3 ISA elf64 toolchain'
+              elif [[ $target_toolchain == *elf32* ]]; then
+                  tools_version='ARCompact/ARCv2 ISA elf32 toolchain'
+              elif [[ $target_toolchain == *linux* || $target_toolchain == *native* ]]; then
+                  if [[ $target_toolchain == *arc64* ]]; then
+                      tools_version='ARCv3 ISA GNU/Linux glibc toolchain'
+                  else
+                      if [[ $target_toolchain == *arc700* ]]; then
+                          if [[ $target_toolchain == *-uclibc ]]; then
+                              tools_version='ARCompact ISA Linux uClibc toolchain'
+                          elif [[ $target_toolchain == *-gnu ]]; then
+                              tools_version='ARC700 GNU/Linux glibc toolchain'
+                          fi
+                      elif [[ $target_toolchain == *archs* || $target_toolchain == *arc32* ]]; then
+                          if [[ $target_toolchain == *-uclibc ]]; then
+                              tools_version='ARCv2 ISA Linux uClibc toolchain'
+                          elif [[ $target_toolchain == *-gnu ]]; then
+                              tools_version='ARC HS GNU/Linux glibc toolchain'
+                          fi
+                      fi
+                  fi
+              elif [[ $target_toolchain == *mingw* ]]; then
+                  tools_version='x86_64 MinGW-W64 toolchain'
+              fi
+              tools_version+=" - build ${{ github.run_number }}"
+              echo "$tools_version"
+          }
+
           for d in $(find ./samples -type d | grep snps-) ; do
             echo "Patching config for sample: $d"
 
@@ -126,6 +159,10 @@ jobs:
             sed -i -e "/CT_UCLIBC_NG_DEVEL_REVISION=/s/\".*\"/\"${UCLIBC_COMMIT}\"/"              $d/crosstool.config
 
             grep 'REVISION\|DEVEL_URL' $d/crosstool.config || true
+
+            echo "CT_TOOLCHAIN_PKGVERSION=\"$(get_tools_version_string $(basename $d))\""      >> $d/crosstool.config
+            echo "# CT_SHOW_CT_VERSION is not set"                                             >> $d/crosstool.config
+
             echo "-----"
           done
       - name: "build ct-ng"
@@ -180,37 +217,37 @@ jobs:
           path: src.tar
           retention-days: 2
 
-  toolchains:
-    needs: [ tarballs, crosstool ]
-    uses: ./.github/workflows/build-toolchains-arc.yml
-    with:
-      samples: >-
-        [
-         "snps-arc-arc700-linux-uclibc",
-         "snps-arc-archs-linux-uclibc",
-         "snps-arc-archs-linux-gnu",
-         "snps-arc32-snps-linux-uclibc",
-         "snps-arc32-snps-linux-gnu",
-         "snps-arc64-snps-linux-gnu",
-         "snps-arc-multilib-elf32",
-         "snps-arceb-multilib-elf32",
-         "snps-arc64-unknown-elf",
-         "snps-x86_64-w64-mingw32"
-        ]
-      release-suffix: ${{ needs.crosstool.outputs.build_suffix }}
+  # toolchains:
+  #   needs: [ tarballs, crosstool ]
+  #   uses: ./.github/workflows/build-toolchains-arc.yml
+  #   with:
+  #     samples: >-
+  #       [
+  #        "snps-arc-arc700-linux-uclibc",
+  #        "snps-arc-archs-linux-uclibc",
+  #        "snps-arc-archs-linux-gnu",
+  #        "snps-arc32-snps-linux-uclibc",
+  #        "snps-arc32-snps-linux-gnu",
+  #        "snps-arc64-snps-linux-gnu",
+  #        "snps-arc-multilib-elf32",
+  #        "snps-arceb-multilib-elf32",
+  #        "snps-arc64-unknown-elf",
+  #        "snps-x86_64-w64-mingw32"
+  #       ]
+  #     release-suffix: ${{ needs.crosstool.outputs.build_suffix }}
 
-  canadian-cross:
-    needs: [ toolchains, crosstool ]
-    uses: ./.github/workflows/build-toolchains-arc.yml
-    with:
-      samples: >-
-        [
-          "snps-arc-elf32-win",
-          "snps-arceb-elf32-win",
-          "snps-arc64-elf-win",
-          "snps-arc-archs-native-gnu",
-          "snps-arc32-snps-native-gnu",
-          "snps-arc64-snps-native-gnu"
-        ]
-      release-suffix: ${{ needs.crosstool.outputs.build_suffix }}
-      canadian-cross: true
+  # canadian-cross:
+  #   needs: [ toolchains, crosstool ]
+  #   uses: ./.github/workflows/build-toolchains-arc.yml
+  #   with:
+  #     samples: >-
+  #       [
+  #         "snps-arc-elf32-win",
+  #         "snps-arceb-elf32-win",
+  #         "snps-arc64-elf-win",
+  #         "snps-arc-archs-native-gnu",
+  #         "snps-arc32-snps-native-gnu",
+  #         "snps-arc64-snps-native-gnu"
+  #       ]
+  #     release-suffix: ${{ needs.crosstool.outputs.build_suffix }}
+  #     canadian-cross: true
