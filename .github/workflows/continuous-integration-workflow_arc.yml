@@ -160,8 +160,8 @@ jobs:
 
             grep 'REVISION\|DEVEL_URL' $d/crosstool.config || true
 
-            echo "CT_TOOLCHAIN_PKGVERSION=\"$(get_tools_version_string $(basename $d))\""      >> $d/crosstool.config
-            echo "# CT_SHOW_CT_VERSION is not set"                                             >> $d/crosstool.config
+            printf "\nCT_TOOLCHAIN_PKGVERSION=\"$(get_tools_version_string $(basename $d))\"\n" >> $d/crosstool.config
+            printf "# CT_SHOW_CT_VERSION is not set\n"                                          >> $d/crosstool.config
 
             echo "-----"
           done
